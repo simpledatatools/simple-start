@@ -65,7 +65,7 @@ from api.views.utils import IsAuthenticatedOrHasAPIKey
     ]
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticatedOrHasAPIKey])
+@permission_classes([IsAuthenticated]) # Auth only, no API key
 def get_apps(request):
     
     user = request.user
@@ -167,7 +167,7 @@ def get_app(request, app_id):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticatedOrHasAPIKey])
+@permission_classes([IsAuthenticated]) # Auth only, no API key
 def add_app(request):
     app_object = request.data
     user = request.user

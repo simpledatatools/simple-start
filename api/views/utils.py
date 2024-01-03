@@ -31,6 +31,8 @@ class IsAuthenticatedOrHasAPIKey(permissions.BasePermission):
                 key = key_request.split()[1]
                 api_key = AppAPIKey.objects.get_from_key(key)
                 if api_key:
+                    # Attach the user associated with the API key to the request
+                    request.user = api_key.user
                     return True
             except AppAPIKey.DoesNotExist:
                 pass  # API Key is not valid
