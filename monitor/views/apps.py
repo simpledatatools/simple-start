@@ -149,14 +149,11 @@ def app_home(request, app_id):
     user.current_app = app
     user.save()
 
-    bottom_menu_items = app.bottom_menu_items()
-
     context = {
         'app': app,
         'smh': 'home',
         'admin': admin,
         'role': role,
-        'bottom_menu_items': bottom_menu_items,
     }
     
     return render(request, 'monitor/apps/home.html', context)

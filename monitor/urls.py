@@ -1,9 +1,12 @@
 from django.urls import path
+from monitor.views import home as home
 from monitor.views import apps as apps
 from monitor.views import app_users as app_users
 from monitor.views import customers as customers
 
 urlpatterns = [
+
+    path('', home.home, name='home'),
     
     # Apps
     path('apps/', apps.apps, name='apps'),

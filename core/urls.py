@@ -43,7 +43,6 @@ urlpatterns = [
     # Web App
     path('internal/', admin.site.urls), # Standard django admin app
     path('', include('accounts.urls')),
-    path('', include('website.urls')),
     path('', include('monitor.urls')),
     path('files/', include('files.urls')),
     path("robots.txt", robots_txt),

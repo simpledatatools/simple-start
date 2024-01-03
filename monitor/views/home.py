@@ -51,4 +51,4 @@ def home(request):
 
     context = {}
     
-    return render(request, 'website/home.html', context)
+    return render(request, 'monitor/home.html', context)
