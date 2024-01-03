@@ -10,19 +10,19 @@
 {% endblock %}
 
 {% block content %}
-{% include 'monitor/customers/components/form.html' %}
+{% include 'monitor/profiles/components/form.html' %}
 {% endblock %}
 
 {% block extra_js %}
 <script>
 
-    const customerFormLoader = document.getElementById('customer-form-loader')
-    const customerFormHolder = document.getElementById('customer-form-holder')
+    const profileFormLoader = document.getElementById('profile-form-loader')
+    const profileFormHolder = document.getElementById('profile-form-holder')
     
     /* Initial loading */
 
-    function getCustomerItem() {
-        const url = "{% url 'ajax_get_customer_item' app.app_id %}?customer_id={{customer.customer_id}}";
+    function getProfileItem() {
+        const url = "{% url 'ajax_get_profile_item' app.app_id %}?profile_id={{profile.profile_id}}";
         fetch(url, {
             method: 'GET',
             headers: {
@@ -34,8 +34,8 @@
         .then(data => {
 
             nameInput.value = data['name']
-            customerFormHolder.classList.remove('d-none')
-            customerFormLoader.classList.add('d-none')
+            profileFormHolder.classList.remove('d-none')
+            profileFormLoader.classList.add('d-none')
 
         })
         .catch(error => {
@@ -44,9 +44,9 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        customerFormHolder.classList.add('d-none')
-        customerFormLoader.classList.remove('d-none')
-        getCustomerItem()
+        profileFormHolder.classList.add('d-none')
+        profileFormLoader.classList.remove('d-none')
+        getProfileItem()
     })
 
     const formLoader = document.getElementById('form-loader')
@@ -54,21 +54,21 @@
 
     saveBtn.addEventListener('click', () => {
         event.preventDefault();
-        updateCustomer()
+        updateProfile()
     });
 
-    function updateCustomer() {
+    function updateProfile() {
 
-        let data = getCustomerFormValues()
+        let data = getProfileFormValues()
         
         if (data['valid']) {
 
-            data['values']['customer_id'] = '{{ customer.customer_id }}'
+            data['values']['profile_id'] = '{{ profile.profile_id }}'
         
             saveBtn.classList.add('d-none');
             formLoader.classList.remove('d-none');
 
-            const url = "{% url 'ajax_update_customer' app.app_id %}";
+            const url = "{% url 'ajax_update_profile' app.app_id %}";
             const formData = data['values'];
             fetch(url, {
                 method: 'POST',

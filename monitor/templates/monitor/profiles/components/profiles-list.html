@@ -1,6 +1,6 @@
 {% load static %}
 <div class="mb-2 text-muted invisible" id="results-count-holder-{{component}}"><small><span id="results-count-{{component}}">0</span> records</small></div>
-<div class="card mb-3 sticky-top" style="top: 80px; z-index: 1;" id="customers-list">
+<div class="card mb-3 sticky-top" style="top: 80px; z-index: 1;" id="profiles-list">
     <div class="card-body p-3">
       <div class="row g-2 align-items-center">
             <div class="navbar-nav-right d-flex align-items-center">
@@ -19,7 +19,7 @@
                 </div>
                 <!-- /Search -->
                 <ul class="navbar-nav flex-row align-items-center ms-auto">
-                    <!-- Place this customer where you want the button to render. -->
+                    <!-- Place this profile where you want the button to render. -->
                     <li class="nav-item lh-1 me-3">
                     <div class="input-group">
                         <label for="order-filter-{{component}}" class="input-group-text">Order:</label>
@@ -32,11 +32,11 @@
                     </li>
                     {% if select_enabled %}
                     <li class="nav-item lh-1 me-2">
-                        <a href="javascript:void(0);" onclick="openCustomerSelector()" class="btn btn-primary float-end" id="select-customer-btn-{{component}}">Add Existing Customer</a>
+                        <a href="javascript:void(0);" onclick="openProfileSelector()" class="btn btn-primary float-end" id="select-profile-btn-{{component}}">Add Existing Profile</a>
                     </li>
                     {% endif %}
                     <li class="nav-item lh-1">
-                        <a href="javascript:void(0);" onclick="addCustomer()" class="btn btn-primary float-end" id="add-customer-btn-{{component}}">Add Customer</a>
+                        <a href="javascript:void(0);" onclick="addProfile()" class="btn btn-primary float-end" id="add-profile-btn-{{component}}">Add Profile</a>
                     </li>
                 </ul>
             </div>
@@ -52,8 +52,8 @@
     <div class="row justify-content-center d-none" id="no-results-{{component}}">
         <div class="col-6 py-5">
             <div class="text-center pt-6">
-                <h5 class="card-title">No Customers Found</h5>
-                <a href="javascript:void(0);" onclick="addCustomer()" class="btn btn-link">Add New Customer</a>
+                <h5 class="card-title">No Profiles Found</h5>
+                <a href="javascript:void(0);" onclick="addProfile()" class="btn btn-link">Add New Profile</a>
             </div>
         </div>
     </div>
@@ -73,15 +73,15 @@
 
 <script>
 
-    const customersList = document.getElementById('customers-list')
-    let customersScrollTimeout;
+    const profilesList = document.getElementById('profiles-list')
+    let profilesScrollTimeout;
     window.addEventListener('scroll', function() {
-        let customersScrollPosition = window.scrollY;
-        clearTimeout(customersScrollTimeout);
-        customersList.style.opacity = 0;
-        customersScrollTimeout = setTimeout(function() {
-            if (customersScrollPosition == 0) {
-                customersList.style.opacity = 1;
+        let profilesScrollPosition = window.scrollY;
+        clearTimeout(profilesScrollTimeout);
+        profilesList.style.opacity = 0;
+        profilesScrollTimeout = setTimeout(function() {
+            if (profilesScrollPosition == 0) {
+                profilesList.style.opacity = 1;
             }
         }, 100);
     });

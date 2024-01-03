@@ -8,16 +8,16 @@ from accounts.models import *
 from backend.models import *
 
 
-class CustomerSerializer(serializers.ModelSerializer):
+class ProfileSerializer(serializers.ModelSerializer):
 
     created_at = serializers.SerializerMethodField()
     last_updated = serializers.SerializerMethodField()
     created_user = serializers.SerializerMethodField()
     
     class Meta:
-        model = Customer
+        model = Profile
         fields = [
-            'customer_id',
+            'profile_id',
             'name',
             'created_user',
             'created_at',

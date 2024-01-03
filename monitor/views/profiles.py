@@ -48,7 +48,7 @@ from django.apps import apps
 
 
 @login_required(login_url='login')
-def customers(request, app_id):
+def profiles(request, app_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -79,16 +79,16 @@ def customers(request, app_id):
     
     context = {
         'app': app,
-        'smh': 'customers',
+        'smh': 'profiles',
         'admin': admin,
         'role': role,
     }
     
-    return render(request, 'monitor/customers/customers.html', context)
+    return render(request, 'monitor/profiles/profiles.html', context)
 
 
 @login_required(login_url='login')
-def add_customer(request, app_id):
+def add_profile(request, app_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -116,17 +116,17 @@ def add_customer(request, app_id):
 
     context = {
         'app': app,
-        'smh': 'customers',
-        'form_title': 'Add customer',
+        'smh': 'profiles',
+        'form_title': 'Add profile',
         'admin': admin,
         'role': role,
     }
     
-    return render(request, 'monitor/customers/add.html', context)
+    return render(request, 'monitor/profiles/add.html', context)
 
 
 @login_required(login_url='login')
-def customer_details(request, app_id, customer_id):
+def profile_details(request, app_id, profile_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -148,8 +148,8 @@ def customer_details(request, app_id, customer_id):
         raise Http404()
     admin = is_admin(app_user)
     role = app_user.role
-    customer = Customer.objects.filter(customer_id=customer_id, app=app, status='active').first()
-    if not customer:
+    profile = Profile.objects.filter(profile_id=profile_id, app=app, status='active').first()
+    if not profile:
         error = 'Invalid request'
         create_user_log(request, valid=False, error=error)
         raise Http404()
@@ -159,17 +159,17 @@ def customer_details(request, app_id, customer_id):
 
     context = {
         'app': app,
-        'customer': customer,
-        'smh': 'customers',
+        'profile': profile,
+        'smh': 'profiles',
         'admin': admin,
         'role': role,
     }
     
-    return render(request, 'monitor/customers/details.html', context)
+    return render(request, 'monitor/profiles/details.html', context)
 
 
 @login_required(login_url='login')
-def update_customer(request, app_id, customer_id):
+def update_profile(request, app_id, profile_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -191,8 +191,8 @@ def update_customer(request, app_id, customer_id):
         raise Http404()
     admin = is_admin(app_user)
     role = app_user.role
-    customer = Customer.objects.filter(customer_id=customer_id, app=app, status='active').first()
-    if not customer:
+    profile = Profile.objects.filter(profile_id=profile_id, app=app, status='active').first()
+    if not profile:
         error = 'Invalid request'
         create_user_log(request, valid=False, error=error)
         raise Http404()
@@ -202,18 +202,18 @@ def update_customer(request, app_id, customer_id):
 
     context = {
         'app': app,
-        'customer': customer,
-        'smh': 'customers',
-        'form_title': 'Update customer',
+        'profile': profile,
+        'smh': 'profiles',
+        'form_title': 'Update profile',
         'admin': admin,
         'role': role,
     }
     
-    return render(request, 'monitor/customers/update.html', context)
+    return render(request, 'monitor/profiles/update.html', context)
 
 
 @login_required(login_url='login')
-def remove_customer(request, app_id, customer_id):
+def remove_profile(request, app_id, profile_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -235,8 +235,8 @@ def remove_customer(request, app_id, customer_id):
         raise Http404()
     admin = is_admin(app_user)
     role = app_user.role
-    customer = Customer.objects.filter(customer_id=customer_id, app=app, status='active').first()
-    if not customer:
+    profile = Profile.objects.filter(profile_id=profile_id, app=app, status='active').first()
+    if not profile:
         error = 'Invalid request'
         create_user_log(request, valid=False, error=error)
         raise Http404()
@@ -246,19 +246,19 @@ def remove_customer(request, app_id, customer_id):
 
     context = {
         'app': app,
-        'customer': customer,
-        'smh': 'customers',
+        'profile': profile,
+        'smh': 'profiles',
         'admin': admin,
         'role': role,
     }
     
-    return render(request, 'monitor/customers/remove.html', context)
+    return render(request, 'monitor/profiles/remove.html', context)
 
 
 
 @require_http_methods(['GET'])
 @login_required(login_url='login')
-def ajax_get_customers(request, app_id):
+def ajax_get_profiles(request, app_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -293,7 +293,7 @@ def ajax_get_customers(request, app_id):
     create_user_log(request)  
     # ----------------------------------------------------------------------------------------
 
-    response_object = get_customers_list(request, app)
+    response_object = get_profiles_list(request, app)
 
     return JsonResponse(response_object, status=200)
 
@@ -301,7 +301,7 @@ def ajax_get_customers(request, app_id):
 
 @require_http_methods(['GET'])
 @login_required(login_url='login')
-def ajax_get_customer_item(request, app_id):
+def ajax_get_profile_item(request, app_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -327,13 +327,13 @@ def ajax_get_customer_item(request, app_id):
         error = 'Invalid request'
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
-    customer_id = request.GET.get('customer_id', None)
-    if customer_id == None:
-        error = "Missing the 'customer_id' parameter"
+    profile_id = request.GET.get('profile_id', None)
+    if profile_id == None:
+        error = "Missing the 'profile_id' parameter"
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
-    customer = Customer.objects.filter(customer_id=customer_id, app=app, status='active').first()
-    if not customer:
+    profile = Profile.objects.filter(profile_id=profile_id, app=app, status='active').first()
+    if not profile:
         error = 'Invalid request'
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
@@ -342,10 +342,10 @@ def ajax_get_customer_item(request, app_id):
     # ----------------------------------------------------------------------------------------
 
     html = render_to_string(
-        template_name="monitor/customers/components/customer-item.html",
+        template_name="monitor/profiles/components/profile-item.html",
         context={
             'app': app,
-            'customer': customer,
+            'profile': profile,
             'render_type': 'display',
             'admin': admin,
         'role': role,
@@ -354,7 +354,7 @@ def ajax_get_customer_item(request, app_id):
 
     response_object = {
         'html': html,
-        'name': customer.name,
+        'name': profile.name,
     }
 
     return JsonResponse(response_object, status=200)
@@ -363,7 +363,7 @@ def ajax_get_customer_item(request, app_id):
 
 @require_http_methods(['POST'])
 @login_required(login_url='login')
-def ajax_add_customer(request, app_id):
+def ajax_add_profile(request, app_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -400,27 +400,27 @@ def ajax_add_customer(request, app_id):
     # ----------------------------------------------------------------------------------------
 
     # Create the collection
-    customer = create_customer(request, app, name)
+    profile = create_profile(request, app, name)
 
     # ----------------------------------------------------------------------------------------
     create_user_log(request, data=data)  
     # ----------------------------------------------------------------------------------------
 
     html = render_to_string(
-        template_name="monitor/customers/components/customer-item.html",
+        template_name="monitor/profiles/components/profile-item.html",
         context={
             'app': app,
-            'customer': customer,
+            'profile': profile,
             'render_type': 'list',
             'admin': admin,
         'role': role,
         }
     )
 
-    redirect = request.build_absolute_uri(reverse('customers', args=(app.app_id, )))
+    redirect = request.build_absolute_uri(reverse('profiles', args=(app.app_id, )))
     response_object = {
         'app_id': app.app_id,
-        'customer_id': customer.customer_id,
+        'profile_id': profile.profile_id,
         'redirect': redirect,
         'html': html,
     }
@@ -431,7 +431,7 @@ def ajax_add_customer(request, app_id):
 
 @require_http_methods(['POST'])
 @login_required(login_url='login')
-def ajax_update_customer(request, app_id):
+def ajax_update_profile(request, app_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -458,15 +458,15 @@ def ajax_update_customer(request, app_id):
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
     data = json.loads(request.body)
-    customer_id = None
-    if 'customer_id' in data:
-        customer_id = data['customer_id']
-    if customer_id == None:
-        error = "Missing the 'customer_id' parameter"
+    profile_id = None
+    if 'profile_id' in data:
+        profile_id = data['profile_id']
+    if profile_id == None:
+        error = "Missing the 'profile_id' parameter"
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
-    customer = Customer.objects.filter(customer_id=customer_id, app=app, status='active').first()
-    if not customer:
+    profile = Profile.objects.filter(profile_id=profile_id, app=app, status='active').first()
+    if not profile:
         error = 'Invalid request'
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
@@ -481,24 +481,24 @@ def ajax_update_customer(request, app_id):
     create_user_log(request, data=data)  
     # ----------------------------------------------------------------------------------------
 
-    customer.name = name
-    customer.save()
+    profile.name = name
+    profile.save()
 
     html = render_to_string(
-        template_name="monitor/customers/components/customer-item.html",
+        template_name="monitor/profiles/components/profile-item.html",
         context={
             'app': app,
-            'customer': customer,
+            'profile': profile,
             'render_type': 'list',
             'admin': admin,
         'role': role,
         }
     )
 
-    redirect = request.build_absolute_uri(reverse('customer_details', args=(app.app_id, customer.customer_id, )))
+    redirect = request.build_absolute_uri(reverse('profile_details', args=(app.app_id, profile.profile_id, )))
 
     response_object = {
-        'message': 'Customer updated successfully',
+        'message': 'Profile updated successfully',
         'redirect': redirect,
         'html': html,
     }
@@ -509,7 +509,7 @@ def ajax_update_customer(request, app_id):
 
 @require_http_methods(['POST'])
 @login_required(login_url='login')
-def ajax_remove_customer(request, app_id):
+def ajax_remove_profile(request, app_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -536,15 +536,15 @@ def ajax_remove_customer(request, app_id):
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
     data = json.loads(request.body)
-    customer_id = None
-    if 'customer_id' in data:
-        customer_id = data['customer_id']
-    if customer_id == None:
-        error = "Missing the 'customer_id' parameter"
+    profile_id = None
+    if 'profile_id' in data:
+        profile_id = data['profile_id']
+    if profile_id == None:
+        error = "Missing the 'profile_id' parameter"
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
-    customer = Customer.objects.filter(customer_id=customer_id, app=app, status='active').first()
-    if not customer:
+    profile = Profile.objects.filter(profile_id=profile_id, app=app, status='active').first()
+    if not profile:
         error = 'Invalid request'
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
@@ -552,13 +552,13 @@ def ajax_remove_customer(request, app_id):
     create_user_log(request, data=data)  
     # ----------------------------------------------------------------------------------------
 
-    customer.status = 'archived'
-    customer.save()
+    profile.status = 'archived'
+    profile.save()
 
-    redirect = request.build_absolute_uri(reverse('customers', args=(app.app_id, )))
+    redirect = request.build_absolute_uri(reverse('profiles', args=(app.app_id, )))
 
     response_object = {
-        'message': 'Customer archived successfully',
+        'message': 'Profile archived successfully',
         'redirect': redirect,
     }
 
@@ -566,7 +566,7 @@ def ajax_remove_customer(request, app_id):
 
 
 
-def get_customers_list(request, app):
+def get_profiles_list(request, app):
 
     user = request.user
 
@@ -596,56 +596,56 @@ def get_customers_list(request, app):
         page_size = 25
     
     # Query from app regions that the user a part of
-    customer_items = Customer.objects.filter(app=app, status="active").order_by('name')
+    profile_items = Profile.objects.filter(app=app, status="active").order_by('name')
 
     # Search Term
     if search_term:
-        customer_items = customer_items.filter(
-            Q(customer_id__icontains=search_term) | 
+        profile_items = profile_items.filter(
+            Q(profile_id__icontains=search_term) | 
             Q(name__icontains=search_term)
         )
 
     # Filters
     if order:
         if order == 'created_at_desc':
-            customer_items = customer_items.order_by('-created_at')
+            profile_items = profile_items.order_by('-created_at')
         if order == 'created_at_asc':
-            customer_items = customer_items.order_by('created_at')
+            profile_items = profile_items.order_by('created_at')
 
     # Pagination
     total_pages = None
     load_more = False
     total_count = 0
-    if customer_items:
-        total_count = len(customer_items)
-        paginator = Paginator(customer_items, per_page=page_size)
+    if profile_items:
+        total_count = len(profile_items)
+        paginator = Paginator(profile_items, per_page=page_size)
         total_pages = paginator.num_pages # Number of total pages
-        customer_items = paginator.get_page(page) # Filters current queryset
+        profile_items = paginator.get_page(page) # Filters current queryset
         if page < total_pages:
             load_more = True
 
     # Generate the Response Object
-    customer_list_html = []
-    for customer_object in customer_items:
+    profile_list_html = []
+    for profile_object in profile_items:
         html = render_to_string(
-            template_name="monitor/customers/components/customer-item.html",
+            template_name="monitor/profiles/components/profile-item.html",
             context={
                 'app': app,
-                'customer': customer_object,
+                'profile': profile_object,
                 'render_type': render_type,
             }
         )
-        customer_list_html.append(html)
+        profile_list_html.append(html)
 
     results = True
-    if len(customer_items) == 0:
+    if len(profile_items) == 0:
         results = False
 
     # Response
     response_object = {
         'success': True,
         'results': results,
-        'items': customer_list_html,
+        'items': profile_list_html,
         'page': page,
         'total_pages': total_pages,
         'load_more': load_more,
@@ -655,16 +655,16 @@ def get_customers_list(request, app):
     return response_object
 
 
-def create_customer(request, app, name):
+def create_profile(request, app, name):
     
     user = request.user
     ip_address = get_ip_address(request)
 
-    customer = Customer()
-    customer.customer_id = randomstr()
-    customer.name = name
-    customer.app = app
-    customer.created_user = user
-    customer.save()
+    profile = Profile()
+    profile.profile_id = randomstr()
+    profile.name = name
+    profile.app = app
+    profile.created_user = user
+    profile.save()
 
-    return customer
+    return profile

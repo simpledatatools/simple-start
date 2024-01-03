@@ -2,7 +2,7 @@ from django.urls import path
 from monitor.views import home as home
 from monitor.views import apps as apps
 from monitor.views import app_users as app_users
-from monitor.views import customers as customers
+from monitor.views import profiles as profiles
 
 urlpatterns = [
 
@@ -37,16 +37,16 @@ urlpatterns = [
     path('ajax/apps/<app_id>/users/remove/', app_users.ajax_remove_app_user, name='ajax_remove_app_user'),
     path('apps/<app_id>/users/<app_user_id>/details/', app_users.app_user_details, name='app_user_details'),
 
-    # Customers
-    path('apps/<app_id>/customers/', customers.customers, name='customers'),
-    path('ajax/apps/<app_id>/customers/list/', customers.ajax_get_customers, name='ajax_get_customers'),
-    path('ajax/apps/<app_id>/customers/item/', customers.ajax_get_customer_item, name='ajax_get_customer_item'),
-    path('apps/<app_id>/customers/add/', customers.add_customer, name='add_customer'),
-    path('ajax/apps/<app_id>/customers/add/', customers.ajax_add_customer, name='ajax_add_customer'),
-    path('apps/<app_id>/customers/<customer_id>/update/', customers.update_customer, name='update_customer'),
-    path('ajax/apps/<app_id>/customers/update/', customers.ajax_update_customer, name='ajax_update_customer'),
-    path('apps/<app_id>/customers/<customer_id>/remove/', customers.remove_customer, name='remove_customer'),
-    path('ajax/apps/<app_id>/customers/remove/', customers.ajax_remove_customer, name='ajax_remove_customer'),
-    path('apps/<app_id>/customers/<customer_id>/details/', customers.customer_details, name='customer_details'),
+    # Profiles
+    path('apps/<app_id>/profiles/', profiles.profiles, name='profiles'),
+    path('ajax/apps/<app_id>/profiles/list/', profiles.ajax_get_profiles, name='ajax_get_profiles'),
+    path('ajax/apps/<app_id>/profiles/item/', profiles.ajax_get_profile_item, name='ajax_get_profile_item'),
+    path('apps/<app_id>/profiles/add/', profiles.add_profile, name='add_profile'),
+    path('ajax/apps/<app_id>/profiles/add/', profiles.ajax_add_profile, name='ajax_add_profile'),
+    path('apps/<app_id>/profiles/<profile_id>/update/', profiles.update_profile, name='update_profile'),
+    path('ajax/apps/<app_id>/profiles/update/', profiles.ajax_update_profile, name='ajax_update_profile'),
+    path('apps/<app_id>/profiles/<profile_id>/remove/', profiles.remove_profile, name='remove_profile'),
+    path('ajax/apps/<app_id>/profiles/remove/', profiles.ajax_remove_profile, name='ajax_remove_profile'),
+    path('apps/<app_id>/profiles/<profile_id>/details/', profiles.profile_details, name='profile_details'),
 
 ]

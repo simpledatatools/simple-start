@@ -103,14 +103,17 @@ class AppAPIKey(AbstractAPIKey):
 
 
 #-------------------------------------------------------------------------------
-# Sample Model
+# Sample Models
 #-------------------------------------------------------------------------------
 
-class Customer(models.Model):
+class Profile(models.Model):
     id = models.AutoField(primary_key=True)
-    customer_id = models.CharField(editable=False, max_length=32, null=True)
+    profile_id = models.CharField(editable=False, max_length=32, null=True)
     app = models.ForeignKey('App', on_delete=models.SET_NULL, null=True)
+    profile_id = models.CharField(max_length=250)
     name = models.CharField(max_length=250)
+    phone_number = models.CharField(max_length=250)
+    email = models.CharField(max_length=250)
     created_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
@@ -133,7 +136,72 @@ class Customer(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['customer_id'], name='customer_index'),
+            models.Index(fields=['profile_id'], name='profile_index'),
+        ]
+
+
+class Connection(models.Model):
+    id = models.AutoField(primary_key=True)
+    connection_id = models.CharField(editable=False, max_length=32, null=True)
+    app = models.ForeignKey('App', on_delete=models.SET_NULL, null=True)
+    parent_profile = models.ForeignKey('Profile', on_delete=models.SET_NULL, null=True, related_name="parent_profile")
+    child_profile = models.ForeignKey('Profile', on_delete=models.SET_NULL, null=True, related_name="child_profile")
+    linked_by = models.CharField(max_length=250)
+    created_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    last_activity = models.DateTimeField(auto_now=True)
+    
+    STATUS = (
+        ('active', 'Active'),
+        ('archived', 'Archived'),
+    )
+
+    status = models.CharField(
+        max_length=25,
+        choices=STATUS,
+        blank=False,
+        default='active',
+    )
+    
+    def __str__(self):
+        return self.id
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['connection_id'], name='connection_index'),
+        ]
+
+
+class Message(models.Model):
+    id = models.AutoField(primary_key=True)
+    message_id = models.CharField(editable=False, max_length=32, null=True)
+    profile = models.ForeignKey('Profile', on_delete=models.SET_NULL, null=True)
+    timestamp = models.CharField(max_length=250)
+    content = models.TextField(null=True)
+    created_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    last_activity = models.DateTimeField(auto_now=True)
+    
+    STATUS = (
+        ('active', 'Active'),
+        ('archived', 'Archived'),
+    )
+
+    status = models.CharField(
+        max_length=25,
+        choices=STATUS,
+        blank=False,
+        default='active',
+    )
+    
+    def __str__(self):
+        return self.id
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['message_id'], name='message_index'),
         ]
 
 

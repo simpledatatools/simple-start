@@ -30,22 +30,22 @@ def validate_app_user(func):
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# Customers
+# Profiles
 #-----------------------------------------------------------------------------------------------------------------------------
 
-def validate_customer(func):
+def validate_profile(func):
     @wraps(func)
     def decorator(request, *args, **kwargs):
         app_id = kwargs.get('app_id')
-        customer_id = kwargs.get('customer_id')
+        profile_id = kwargs.get('profile_id')
         user = request.user
 
-        customer = Customer.objects.filter(customer_id=customer_id, app__app_id=app_id, status="active", app__status="active").first()
-        if not customer:
-            return Response({'errors': ['Customer does not exist']}, status=status.HTTP_400_BAD_REQUEST)
+        profile = Profile.objects.filter(profile_id=profile_id, app__app_id=app_id, status="active", app__status="active").first()
+        if not profile:
+            return Response({'errors': ['Profile does not exist']}, status=status.HTTP_400_BAD_REQUEST)
 
         # Add app and app_user to request for later use
-        request.customer = customer
+        request.profile = profile
 
         return func(request, *args, **kwargs)
     return decorator

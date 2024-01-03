@@ -29,26 +29,26 @@ logger = logging.getLogger('SimpleAg')
 from backend.decorators import *
 
 # Serializers
-from api.serializers.customer_serializers import *
+from api.serializers.profile_serializers import *
 
 # API documentation
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from api.documentation.customer_documentation import *
+from api.documentation.profile_documentation import *
 from api.documentation.common_elements import error_response, success_response
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# Getting customers
+# Getting profiles
 #-----------------------------------------------------------------------------------------------------------------------------
 
 @swagger_auto_schema(
     method='get',
-    tags=['Customers'],
-    operation_id="Get Customer List",
-    operation_description="Retrieve a list of customers",
+    tags=['Profiles'],
+    operation_id="Get Profile List",
+    operation_description="Retrieve a list of profiles",
     responses={
-        200: customer_list_response_schema,
+        200: profile_list_response_schema,
         400: error_response,
         403: error_response
     },
@@ -62,13 +62,13 @@ from api.documentation.common_elements import error_response, success_response
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-def get_customers(request, app_id):
+def get_profiles(request, app_id):
     
     user = request.user
     app = request.app
 
-    # Filter customers based on app and status, using select_related for optimization
-    query = Customer.objects.select_related('app', 'created_user').filter(app=app, status='active')
+    # Filter profiles based on app and status, using select_related for optimization
+    query = Profile.objects.select_related('app', 'created_user').filter(app=app, status='active')
 
     # Apply search filtering if applicable
     search_query = request.query_params.get('search', '').strip()
@@ -99,16 +99,16 @@ def get_customers(request, app_id):
     paginator = Paginator(query, page_size)
 
     try:
-        customers = paginator.page(page_number)
+        profiles = paginator.page(page_number)
     except PageNotAnInteger:
-        customers = paginator.page(1)
+        profiles = paginator.page(1)
     except EmptyPage:
-        customers = paginator.page(paginator.num_pages)
+        profiles = paginator.page(paginator.num_pages)
 
-    serializer = CustomerSerializer(customers, many=True)
+    serializer = ProfileSerializer(profiles, many=True)
     response_data = {
-        'customers': serializer.data,
-        'page': customers.number,
+        'profiles': serializer.data,
+        'page': profiles.number,
         'pages': paginator.num_pages,
         'records_count': paginator.count
     }
@@ -118,11 +118,11 @@ def get_customers(request, app_id):
 
 @swagger_auto_schema(
     method='get',
-    tags=['Customers'],
-    operation_id="Get Customer",
-    operation_description="Retrieve a customer",
+    tags=['Profiles'],
+    operation_id="Get Profile",
+    operation_description="Retrieve a profile",
     responses={
-        200: customer_response_schema,
+        200: profile_response_schema,
         400: error_response,
         403: error_response
     },
@@ -131,30 +131,30 @@ def get_customers(request, app_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-@validate_customer
-def get_customer(request, app_id, customer_id):
+@validate_profile
+def get_profile(request, app_id, profile_id):
 
     user = request.user
     app = request.app
-    customer = request.customer
+    profile = request.profile
 
-    serializer = CustomerSerializer(customer, many=False)
-    return Response({'customer': serializer.data})
+    serializer = ProfileSerializer(profile, many=False)
+    return Response({'profile': serializer.data})
 
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# Adding customers
+# Adding profiles
 #-----------------------------------------------------------------------------------------------------------------------------
 
 @swagger_auto_schema(
     method='post',
-    tags=['Customers'],
-    operation_id="Add Customer",
-    operation_description="Add a customer",
-    request_body=customer_add_schema,
+    tags=['Profiles'],
+    operation_id="Add Profile",
+    operation_description="Add a profile",
+    request_body=profile_add_schema,
     responses={
-        201: customer_response_schema,
+        201: profile_response_schema,
         400: error_response,
         403: error_response,
         500: error_response
@@ -163,13 +163,13 @@ def get_customer(request, app_id, customer_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-def add_customer(request, app_id):
-    customer_object = request.data
+def add_profile(request, app_id):
+    profile_object = request.data
     user = request.user
     app = request.app
     
-    valid_params = check_params(customer_object, [
-        {'param': 'customer_id', 'type': 'string', 'required': False, 'length': 32},
+    valid_params = check_params(profile_object, [
+        {'param': 'profile_id', 'type': 'string', 'required': False, 'length': 32},
         {'param': 'name', 'type': 'string', 'required': True, 'length': 250},
         {'param': 'data', 'type': 'object', 'required': False},
         {'param': 'config', 'type': 'object', 'required': False},
@@ -178,24 +178,24 @@ def add_customer(request, app_id):
     if valid_params['valid']:
         try:
             with transaction.atomic():
-                result = create_customer_record(customer_object, app, request.user)
-            serializer = CustomerSerializer(result['customer'])
-            return Response({'customer': serializer.data}, status=status.HTTP_201_CREATED)
+                result = create_profile_record(profile_object, app, request.user)
+            serializer = ProfileSerializer(result['profile'])
+            return Response({'profile': serializer.data}, status=status.HTTP_201_CREATED)
         except Exception as e:
-            logger.error(f'Error creating customer: {e}')
-            return Response({'errors': ['Failed to create customer.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(f'Error creating profile: {e}')
+            return Response({'errors': ['Failed to create profile.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         return Response({'errors': valid_params['errors']}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(
     method='post',
-    tags=['Customers'],
-    operation_id="Add Customers",
-    operation_description="Add a list of customers",
-    request_body=customer_add_request_body,
+    tags=['Profiles'],
+    operation_id="Add Profiles",
+    operation_description="Add a list of profiles",
+    request_body=profile_add_request_body,
     responses={
-        200: add_customers_response_schema,
+        200: add_profiles_response_schema,
         400: error_response,
         403: error_response,
         500: error_response
@@ -204,56 +204,56 @@ def add_customer(request, app_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-def add_customers(request, app_id):
+def add_profiles(request, app_id):
     data = request.data
     app = request.app
 
-    customers_data = data.get('customers')
-    if not isinstance(customers_data, list) or not customers_data:
-        return Response({'errors': ['Customers list is required and should not be empty.']}, status=status.HTTP_400_BAD_REQUEST)
-    if len(customers_data) > 100: # Check if there are more than 100 objects
+    profiles_data = data.get('profiles')
+    if not isinstance(profiles_data, list) or not profiles_data:
+        return Response({'errors': ['Profiles list is required and should not be empty.']}, status=status.HTTP_400_BAD_REQUEST)
+    if len(profiles_data) > 100: # Check if there are more than 100 objects
         return Response({'errors': ['Cannot perform bulk operations on more than 100 objects.']}, status=status.HTTP_400_BAD_REQUEST)
     
-    response_data = {'customers_added': [], 'customers_not_added': []}
+    response_data = {'profiles_added': [], 'profiles_not_added': []}
 
     try:
         with transaction.atomic():
-            for index, customer_object in enumerate(customers_data):
-                valid_params = check_params(customer_object, [
-                    {'param': 'customer_id', 'type': 'string', 'required': False, 'length': 32},
+            for index, profile_object in enumerate(profiles_data):
+                valid_params = check_params(profile_object, [
+                    {'param': 'profile_id', 'type': 'string', 'required': False, 'length': 32},
                     {'param': 'name', 'type': 'string', 'required': True, 'length': 250},
                     {'param': 'data', 'type': 'object', 'required': False},
                     {'param': 'config', 'type': 'object', 'required': False},
                 ])
 
                 if valid_params['valid']:
-                    result = create_customer_record(customer_object, app, request.user)
-                    serializer = CustomerSerializer(result['customer'])
-                    response_data['customers_added'].append(serializer.data)
+                    result = create_profile_record(profile_object, app, request.user)
+                    serializer = ProfileSerializer(result['profile'])
+                    response_data['profiles_added'].append(serializer.data)
                 else:
-                    response_data['customers_not_added'].append({
+                    response_data['profiles_not_added'].append({
                         'index': index,
-                        'submitted_object': customer_object,
+                        'submitted_object': profile_object,
                         'errors': valid_params['errors']
                     })
         return Response(response_data, status=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f'Error adding customers: {e}')
-        return Response({'errors': ['Failed to add customers.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f'Error adding profiles: {e}')
+        return Response({'errors': ['Failed to add profiles.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# Updating customers
+# Updating profiles
 #-----------------------------------------------------------------------------------------------------------------------------
 
 @swagger_auto_schema(
     method='put',
-    tags=['Customers'],
-    operation_id="Update Customer",
-    operation_description="Update a customer",
-    request_body=customer_update_schema,
+    tags=['Profiles'],
+    operation_id="Update Profile",
+    operation_description="Update a profile",
+    request_body=profile_update_schema,
     responses={
-        201: customer_response_schema,
+        201: profile_response_schema,
         400: error_response,
         403: error_response,
         500: error_response
@@ -262,15 +262,15 @@ def add_customers(request, app_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-@validate_customer
-def update_customer(request, app_id, customer_id):
-    customer_object = request.data
+@validate_profile
+def update_profile(request, app_id, profile_id):
+    profile_object = request.data
     user = request.user
     app = request.app
-    customer = request.customer
+    profile = request.profile
     
-    valid_params = check_params(customer_object, [
-        {'param': 'customer_id', 'type': 'string', 'required': False, 'length': 32},
+    valid_params = check_params(profile_object, [
+        {'param': 'profile_id', 'type': 'string', 'required': False, 'length': 32},
         {'param': 'name', 'type': 'string', 'required': False, 'length': 250},
         {'param': 'data', 'type': 'object', 'required': False},
         {'param': 'config', 'type': 'object', 'required': False},
@@ -279,24 +279,24 @@ def update_customer(request, app_id, customer_id):
     if valid_params['valid']:
         try:
             with transaction.atomic():
-                result = update_customer_record(app, customer, customer_object)
-            serializer = CustomerSerializer(result['customer'])
-            return Response({'customer': serializer.data}, status=status.HTTP_200_OK)
+                result = update_profile_record(app, profile, profile_object)
+            serializer = ProfileSerializer(result['profile'])
+            return Response({'profile': serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f'Error updating customer: {e}')
-            return Response({'errors': ['Failed to update customer.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(f'Error updating profile: {e}')
+            return Response({'errors': ['Failed to update profile.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         return Response({'errors': valid_params['errors']}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(
     method='put',
-    tags=['Customers'],
-    operation_id="Update Customers",
-    operation_description="Update a list of customers",
-    request_body=customer_update_request_body,
+    tags=['Profiles'],
+    operation_id="Update Profiles",
+    operation_description="Update a list of profiles",
+    request_body=profile_update_request_body,
     responses={
-        200: update_customers_response_schema,
+        200: update_profiles_response_schema,
         400: error_response,
         403: error_response,
         500: error_response
@@ -305,66 +305,66 @@ def update_customer(request, app_id, customer_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-def update_customers(request, app_id):
+def update_profiles(request, app_id):
     data = request.data
     app = request.app
 
-    customers_data = data.get('customers')
-    if not isinstance(customers_data, list) or not customers_data:
-        return Response({'errors': ['Customers list is required and should not be empty.']}, status=status.HTTP_400_BAD_REQUEST)
-    if len(customers_data) > 100: # Check if there are more than 100 objects
+    profiles_data = data.get('profiles')
+    if not isinstance(profiles_data, list) or not profiles_data:
+        return Response({'errors': ['Profiles list is required and should not be empty.']}, status=status.HTTP_400_BAD_REQUEST)
+    if len(profiles_data) > 100: # Check if there are more than 100 objects
         return Response({'errors': ['Cannot perform bulk operations on more than 100 objects.']}, status=status.HTTP_400_BAD_REQUEST)
     
-    response_data = {'customers_updated': [], 'customers_not_updated': []}
+    response_data = {'profiles_updated': [], 'profiles_not_updated': []}
 
     try:
         with transaction.atomic():
-            for index, customer_object in enumerate(customers_data):
-                valid_params = check_params(customer_object, [
-                    {'param': 'customer_id', 'type': 'string', 'required': True, 'length': 32},
+            for index, profile_object in enumerate(profiles_data):
+                valid_params = check_params(profile_object, [
+                    {'param': 'profile_id', 'type': 'string', 'required': True, 'length': 32},
                     {'param': 'name', 'type': 'string', 'required': False, 'length': 250},
                     {'param': 'data', 'type': 'object', 'required': False},
                     {'param': 'config', 'type': 'object', 'required': False},
                 ])
 
                 if valid_params['valid']:
-                    customer_id = customer_object['customer_id']
+                    profile_id = profile_object['profile_id']
                     try:
-                        customer = Customer.objects.get(customer_id=customer_id, app=app, status="active")
-                        result = update_customer_record(app, customer, customer_object)
-                        serializer = CustomerSerializer(result['customer'])
-                        response_data['customers_updated'].append(serializer.data)
-                    except Customer.DoesNotExist:
-                        response_data['customers_not_updated'].append({
+                        profile = Profile.objects.get(profile_id=profile_id, app=app, status="active")
+                        result = update_profile_record(app, profile, profile_object)
+                        serializer = ProfileSerializer(result['profile'])
+                        response_data['profiles_updated'].append(serializer.data)
+                    except Profile.DoesNotExist:
+                        response_data['profiles_not_updated'].append({
                             'index': index,
-                            'submitted_object': customer_object,
-                            'errors': ['Customer not found']
+                            'submitted_object': profile_object,
+                            'errors': ['Profile not found']
                         })
                 else:
-                    response_data['customers_not_updated'].append({
+                    response_data['profiles_not_updated'].append({
                         'index': index,
-                        'submitted_object': customer_object,
+                        'submitted_object': profile_object,
                         'errors': valid_params['errors']
                     })
 
         return Response(response_data, status=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f'Error updating customers: {e}')
-        return Response({'errors': ['Failed to update customers.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f'Error updating profiles: {e}')
+        return Response({'errors': ['Failed to update profiles.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# Archiving customers
+# Archiving profiles
 #-----------------------------------------------------------------------------------------------------------------------------
 
 @swagger_auto_schema(
     method='put',
-    tags=['Customers'],
-    operation_id="Archive Customer",
-    operation_description="Archive a customer",
+    tags=['Profiles'],
+    operation_id="Archive Profile",
+    operation_description="Archive a profile",
     responses={
-        201: customer_response_schema,
+        201: profile_response_schema,
         400: error_response,
         403: error_response,
         500: error_response
@@ -373,30 +373,30 @@ def update_customers(request, app_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-@validate_customer
-def archive_customer(request, app_id, customer_id):
+@validate_profile
+def archive_profile(request, app_id, profile_id):
     app = request.app
-    customer = request.customer
+    profile = request.profile
 
     try:
         with transaction.atomic():
-            customer.status = "archived"
-            customer.save()
-        serializer = CustomerSerializer(customer)
-        return Response({'customer': serializer.data}, status=status.HTTP_200_OK)
+            profile.status = "archived"
+            profile.save()
+        serializer = ProfileSerializer(profile)
+        return Response({'profile': serializer.data}, status=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f'Error archiving customer: {e}')
-        return Response({'errors': ['Failed to archive customer.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f'Error archiving profile: {e}')
+        return Response({'errors': ['Failed to archive profile.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @swagger_auto_schema(
     method='put',
-    tags=['Customers'],
-    operation_id="Archive Customers",
-    operation_description="Archive a list of customers",
-    request_body=customer_archive_request_body,
+    tags=['Profiles'],
+    operation_id="Archive Profiles",
+    operation_description="Archive a list of profiles",
+    request_body=profile_archive_request_body,
     responses={
-        200: archive_customers_response_schema,
+        200: archive_profiles_response_schema,
         400: error_response,
         403: error_response,
         500: error_response
@@ -405,60 +405,60 @@ def archive_customer(request, app_id, customer_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-def archive_customers(request, app_id):
+def archive_profiles(request, app_id):
     data = request.data
     app = request.app
 
-    customers_data = data.get('customers')
-    if not isinstance(customers_data, list) or not customers_data:
-        return Response({'errors': ['Customers list is required and should not be empty.']}, status=status.HTTP_400_BAD_REQUEST)
-    if len(customers_data) > 100: # Check if there are more than 100 objects
+    profiles_data = data.get('profiles')
+    if not isinstance(profiles_data, list) or not profiles_data:
+        return Response({'errors': ['Profiles list is required and should not be empty.']}, status=status.HTTP_400_BAD_REQUEST)
+    if len(profiles_data) > 100: # Check if there are more than 100 objects
         return Response({'errors': ['Cannot perform bulk operations on more than 100 objects.']}, status=status.HTTP_400_BAD_REQUEST)
     
-    response_data = {'customers_archived': [], 'customers_not_archived': []}
+    response_data = {'profiles_archived': [], 'profiles_not_archived': []}
 
     try:
         with transaction.atomic():
-            for index, customer_object in enumerate(customers_data):
-                valid_params = check_params(customer_object, [
-                    {'param': 'customer_id', 'type': 'string', 'required': True, 'length': 32},
+            for index, profile_object in enumerate(profiles_data):
+                valid_params = check_params(profile_object, [
+                    {'param': 'profile_id', 'type': 'string', 'required': True, 'length': 32},
                 ])
 
                 if valid_params['valid']:
-                    customer_id = customer_object['customer_id']
+                    profile_id = profile_object['profile_id']
                     try:
-                        customer = Customer.objects.get(customer_id=customer_id, app=app, status="active")
-                        customer.status = "archived"
-                        customer.save()
-                        serializer = CustomerSerializer(customer)
-                        response_data['customers_archived'].append(serializer.data)
-                    except Customer.DoesNotExist:
-                        response_data['customers_not_archived'].append({
+                        profile = Profile.objects.get(profile_id=profile_id, app=app, status="active")
+                        profile.status = "archived"
+                        profile.save()
+                        serializer = ProfileSerializer(profile)
+                        response_data['profiles_archived'].append(serializer.data)
+                    except Profile.DoesNotExist:
+                        response_data['profiles_not_archived'].append({
                             'index': index,
-                            'submitted_object': customer_object,
-                            'errors': ['Customer not found']
+                            'submitted_object': profile_object,
+                            'errors': ['Profile not found']
                         })
                 else:
-                    response_data['customers_not_archived'].append({
+                    response_data['profiles_not_archived'].append({
                         'index': index,
-                        'submitted_object': customer_object,
+                        'submitted_object': profile_object,
                         'errors': valid_params['errors']
                     })
 
         return Response(response_data, status=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f'Error archiving customers: {e}')
-        return Response({'errors': ['Failed to archive customers.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f'Error archiving profiles: {e}')
+        return Response({'errors': ['Failed to archive profiles.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @swagger_auto_schema(
     method='put',
-    tags=['Customers'],
-    operation_id="Destroy Customers",
-    operation_description="Destroy and archive all customers",
+    tags=['Profiles'],
+    operation_id="Destroy Profiles",
+    operation_description="Destroy and archive all profiles",
     request_body=None,
     responses={
-        200: destroy_customers_response_schema,
+        200: destroy_profiles_response_schema,
         400: error_response,
         403: error_response,
         500: error_response
@@ -467,39 +467,39 @@ def archive_customers(request, app_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-def destroy_customers(request, app_id):
+def destroy_profiles(request, app_id):
     user = request.user 
     app = request.app
     
     # Fetching apps that the user has access to and are active
-    customers = Customer.objects.filter(app=app, status='active')
+    profiles = Profile.objects.filter(app=app, status='active')
 
-    if not customers:
-        return Response({'errors': ['No active customers.']}, status=status.HTTP_400_BAD_REQUEST)
+    if not profiles:
+        return Response({'errors': ['No active profiles.']}, status=status.HTTP_400_BAD_REQUEST)
 
     # Update the status of each app to 'archived'
-    for customer in customers:
-        customer.status = 'archived'
+    for profile in profiles:
+        profile.status = 'archived'
 
     try:
         with transaction.atomic():
-            Customer.objects.bulk_update(customers, ['status'])
-        serializer = CustomerSerializer(customers, many=True)
-        return Response({'customers_archived': serializer.data}, status=status.HTTP_200_OK)
+            Profile.objects.bulk_update(profiles, ['status'])
+        serializer = ProfileSerializer(profiles, many=True)
+        return Response({'profiles_archived': serializer.data}, status=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f'Error destroying customers: {e}')
-        return Response({'errors': ['Failed to destroy customers.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f'Error destroying profiles: {e}')
+        return Response({'errors': ['Failed to destroy profiles.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# Export customers
+# Export profiles
 #-----------------------------------------------------------------------------------------------------------------------------
 
 @swagger_auto_schema(
     method='post',
-    tags=['Customers'],
-    operation_id="Export Customers",
-    operation_description="Export customer data to a flat file",
+    tags=['Profiles'],
+    operation_id="Export Profiles",
+    operation_description="Export profile data to a flat file",
     request_body=None,
     responses={
         202: success_response,
@@ -511,7 +511,7 @@ def destroy_customers(request, app_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-def export_customers(request, app_id):
+def export_profiles(request, app_id):
     user = request.user
     app = request.app
 
@@ -525,15 +525,15 @@ def export_customers(request, app_id):
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# Utils customers
+# Utils profiles
 #-----------------------------------------------------------------------------------------------------------------------------
 
-def create_customer_record(data,  app, user):
+def create_profile_record(data,  app, user):
     try:
-        customer_id = data.get('customer_id', randomstr())
+        profile_id = data.get('profile_id', randomstr())
 
-        customer_data = {
-            'customer_id': customer_id,
+        profile_data = {
+            'profile_id': profile_id,
             'name': data['name'],
             'app': app,
             'created_user': user,
@@ -542,41 +542,41 @@ def create_customer_record(data,  app, user):
         }
 
         # Remove None values from dictionary
-        customer_data = {k: v for k, v in customer_data.items() if v is not None}
+        profile_data = {k: v for k, v in profile_data.items() if v is not None}
 
-        customer = Customer.objects.create(**customer_data)
+        profile = Profile.objects.create(**profile_data)
 
         return {
             'success': True,
-            'customer': customer,
+            'profile': profile,
         }
 
     except Exception as e:
         return {
             'success': False,
-            'errors': ['Error creating the customer record'],
+            'errors': ['Error creating the profile record'],
         }
 
 
-def update_customer_record(app, customer, data):
+def update_profile_record(app, profile, data):
     try:
         updated_fields = []
 
         for field in ['name', 'data', 'config']:
             if field in data:
-                setattr(customer, field, data[field])
+                setattr(profile, field, data[field])
                 updated_fields.append(field)
 
         if updated_fields:
-            customer.save(update_fields=updated_fields)
+            profile.save(update_fields=updated_fields)
 
         return {
             'success': True,
-            'customer': customer,
+            'profile': profile,
         }
 
     except Exception as e:
         return {
             'success': False,
-            'errors': ['Error updating the customer record'],
+            'errors': ['Error updating the profile record'],
         }
