@@ -39,6 +39,9 @@ urlpatterns = [
     
     # API: Apps
     path('api/apps/', include('api.urls.app_urls')),
+
+    # API: Customers
+    path('api/apps/<str:app_id>/customers/', include('api.urls.customer_urls')),
     
     # Web App
     path('internal/', admin.site.urls), # Standard django admin app

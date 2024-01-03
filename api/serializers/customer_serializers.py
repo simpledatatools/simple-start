@@ -10,7 +10,6 @@ from backend.models import *
 
 class CustomerSerializer(serializers.ModelSerializer):
 
-    customer_configuration_id = serializers.SerializerMethodField()
     created_at = serializers.SerializerMethodField()
     last_updated = serializers.SerializerMethodField()
     created_user = serializers.SerializerMethodField()
@@ -25,12 +24,6 @@ class CustomerSerializer(serializers.ModelSerializer):
             'last_updated',
             'status',
         ]
-    
-    def get_customer_configuration_id(self, obj):
-        if obj.customer_configuration:
-            return obj.customer_configuration.customer_configuration_id
-        return None
-        
     
     def get_created_at(self, obj):
         date = obj.created_at
