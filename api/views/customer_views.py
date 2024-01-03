@@ -60,7 +60,7 @@ from api.documentation.common_elements import error_response, success_response
     ]
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
 def get_customers(request, app_id):
     
@@ -129,7 +129,7 @@ def get_customers(request, app_id):
     manual_parameters=[]
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
 @validate_customer
 def get_customer(request, app_id, customer_id):
@@ -161,7 +161,7 @@ def get_customer(request, app_id, customer_id):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
 def add_customer(request, app_id):
     customer_object = request.data
@@ -202,7 +202,7 @@ def add_customer(request, app_id):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
 def add_customers(request, app_id):
     data = request.data
@@ -260,7 +260,7 @@ def add_customers(request, app_id):
     }
 )
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
 @validate_customer
 def update_customer(request, app_id, customer_id):
@@ -303,7 +303,7 @@ def update_customer(request, app_id, customer_id):
     }
 )
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
 def update_customers(request, app_id):
     data = request.data
@@ -371,7 +371,7 @@ def update_customers(request, app_id):
     }
 )
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
 @validate_customer
 def archive_customer(request, app_id, customer_id):
@@ -403,7 +403,7 @@ def archive_customer(request, app_id, customer_id):
     }
 )
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
 def archive_customers(request, app_id):
     data = request.data
@@ -465,7 +465,7 @@ def archive_customers(request, app_id):
     }
 )
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
 def destroy_customers(request, app_id):
     user = request.user 
@@ -509,7 +509,7 @@ def destroy_customers(request, app_id):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
 def export_customers(request, app_id):
     user = request.user

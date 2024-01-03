@@ -31,11 +31,16 @@ from backend.decorators import *
 # Serializers
 from api.serializers.app_serializers import *
 
+from api.views.utils import *
+
 # API documentation
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from api.documentation.app_documentation import *
 from api.documentation.common_elements import error_response, success_response
+
+# Auth
+from api.views.utils import IsAuthenticatedOrHasAPIKey
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -60,7 +65,7 @@ from api.documentation.common_elements import error_response, success_response
     ]
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 def get_apps(request):
     
     user = request.user
@@ -133,7 +138,7 @@ def get_apps(request):
     manual_parameters=[]
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
 def get_app(request, app_id):
 
@@ -162,7 +167,7 @@ def get_app(request, app_id):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 def add_app(request):
     app_object = request.data
     user = request.user
@@ -201,7 +206,7 @@ def add_app(request):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 def add_apps(request):
     data = request.data
     
@@ -257,7 +262,7 @@ def add_apps(request):
     }
 )
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
 def update_app(request, app_id):
     app_object = request.data
@@ -298,7 +303,7 @@ def update_app(request, app_id):
     }
 )
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 def update_apps(request):
     data = request.data
 
@@ -364,7 +369,7 @@ def update_apps(request):
     }
 )
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
 def archive_app(request, app_id):
     app = request.app
@@ -394,7 +399,7 @@ def archive_app(request, app_id):
     }
 )
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 def archive_apps(request):
     data = request.data
 
@@ -454,7 +459,7 @@ def archive_apps(request):
     }
 )
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 def destroy_apps(request):
     user = request.user
 
@@ -498,7 +503,7 @@ def destroy_apps(request):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrHasAPIKey])
 def export_apps(request):
     user = request.user
 
