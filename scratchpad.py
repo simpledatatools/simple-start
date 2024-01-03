@@ -22,8 +22,3 @@ logger = logging.getLogger('SimpleStart')
 from backend.models import *
 from core.utils import *
 from accounts.models import *
-
-
-
-# Deal with the mail utils
-# Model Ids

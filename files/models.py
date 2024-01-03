@@ -4,7 +4,7 @@ import uuid
 from core.utils import *
 
 class File(models.Model):
-    id = models.CharField(max_length=32, primary_key=True, default=generate_model_id, editable=False)
+    id = models.AutoField(primary_key=True)
     legacy_id = models.IntegerField(null=True)
     display_id = models.CharField(editable=False, max_length=16, null=False)
     file = models.FileField(upload_to='uploads/')

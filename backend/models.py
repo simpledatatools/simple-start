@@ -17,7 +17,7 @@ from rest_framework_api_key.models import AbstractAPIKey
 #-------------------------------------------------------------------------------
 
 class App(models.Model):
-    id = models.CharField(max_length=32, primary_key=True, default=generate_model_id, editable=False)
+    id = models.AutoField(primary_key=True)
     app_id = models.CharField(editable=False, max_length=32, null=True)
     name = models.CharField(max_length=250)
     created_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
@@ -47,7 +47,7 @@ class App(models.Model):
 
 
 class AppUser(models.Model):
-    id = models.CharField(max_length=32, primary_key=True, default=generate_model_id, editable=False)
+    id = models.AutoField(primary_key=True)
     app_user_id  = models.CharField(max_length=16, null=False, blank=True)
     app = models.ForeignKey('App', on_delete=models.SET_NULL, null=True)
     user = models.ForeignKey('accounts.CustomUser', on_delete=models.SET_NULL, null=True, related_name="app_user")
@@ -107,7 +107,7 @@ class AppAPIKey(AbstractAPIKey):
 #-------------------------------------------------------------------------------
 
 class Customer(models.Model):
-    id = models.CharField(max_length=32, primary_key=True, default=generate_model_id, editable=False)
+    id = models.AutoField(primary_key=True)
     customer_id = models.CharField(editable=False, max_length=32, null=True)
     app = models.ForeignKey('App', on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=250)
@@ -143,7 +143,7 @@ class Customer(models.Model):
 
 class ImportTemplate(models.Model):
 
-    id = models.CharField(max_length=32, primary_key=True, default=generate_model_id, editable=False)
+    id = models.AutoField(primary_key=True)
     template = models.FileField(upload_to='uploads/')
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -160,7 +160,7 @@ class ImportTemplate(models.Model):
 
 class ImportFile(models.Model):
 
-    id = models.CharField(max_length=32, primary_key=True, default=generate_model_id, editable=False)
+    id = models.AutoField(primary_key=True)
     import_id = models.CharField(max_length=32, null=False, blank=True)
     import_file = models.ForeignKey('files.File', on_delete=models.SET_NULL, null=True)
     app = models.ForeignKey('App', on_delete=models.SET_NULL, null=True)
@@ -190,7 +190,7 @@ class ImportFile(models.Model):
 
 class ImportFileLog(models.Model):
 
-    id = models.CharField(max_length=32, primary_key=True, default=generate_model_id, editable=False)
+    id = models.AutoField(primary_key=True)
     log_id = models.CharField(max_length=32, null=False, blank=True)
     import_file = models.ForeignKey('ImportFile', on_delete=models.SET_NULL, null=True)
     row_number = models.IntegerField()
@@ -215,7 +215,7 @@ class ImportFileLog(models.Model):
 
 class ExportFile(models.Model):
 
-    id = models.CharField(max_length=32, primary_key=True, default=generate_model_id, editable=False)
+    id = models.AutoField(primary_key=True)
     export_id = models.CharField(max_length=32, null=False, blank=True)
     export_file = models.FileField(upload_to='exports/', null=True)
     app = models.ForeignKey('App', on_delete=models.SET_NULL, null=True)
@@ -245,7 +245,7 @@ class ExportFile(models.Model):
 #-------------------------------------------------------------------------------
 
 class UserLog(models.Model):
-    id = models.CharField(max_length=32, primary_key=True, default=generate_model_id, editable=False)
+    id = models.AutoField(primary_key=True)
     user_log_id = models.CharField(editable=False, max_length=32, null=True)
     valid = models.BooleanField(default=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)

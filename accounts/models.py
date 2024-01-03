@@ -22,7 +22,7 @@ class CustomUser(AbstractUser):
 
 
 class UserExtras(models.Model):
-    id = models.CharField(max_length=32, primary_key=True, default=generate_model_id, editable=False)
+    id = models.AutoField(primary_key=True)
     created_at = models.DateTimeField(auto_now_add=True, null=False)
     last_active = models.DateTimeField(auto_now_add=True)
     
@@ -35,7 +35,7 @@ class UserExtras(models.Model):
 
 
 class MailLinkModel(models.Model):
-    id = models.CharField(max_length=32, primary_key=True, default=generate_model_id, editable=False)
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     key = models.CharField(max_length=255, default="", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -53,7 +53,7 @@ class MailLinkModel(models.Model):
     
 
 class VerifyCode(models.Model):
-    id = models.CharField(max_length=32, primary_key=True, default=generate_model_id, editable=False)
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     code = models.CharField(max_length=5, null=True, blank=True)
     key = models.CharField(max_length=64, null=True, blank=True)
