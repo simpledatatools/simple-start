@@ -1,0 +1,91 @@
+{% load static %}
+<div id="app-form-loader" class="d-none">
+    {% include 'monitor/base/loader.html' %}
+</div>
+<div class="row mt-3" id="app-form-holder">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5>{{ form_title }}</h5>
+                    </div>
+                    <div class="col-auto">
+                        <div id="form-loader" class="d-none">
+                            {% include 'monitor/base/loader-inline.html' %}
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12" id="nameHolder">
+                        <label class="small mb-1" for="nameInput">Name</label>
+                        <input class="form-control formInput" id="nameInput" type="text" placeholder="Enter a short name for this app">
+                        <span class="errorMessageInput text-sm text-danger d-none" id="nameErrorMessage"></span>
+                    </div>
+                </div>
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <a href="javascript:void(0);" class="btn btn-primary float-end" id="save-btn">Save</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    const nameHolder = document.getElementById('nameHolder')
+    const nameInput = document.getElementById('nameInput')
+    const nameErrorMessage = document.getElementById('nameErrorMessage')
+
+    const formInputs = document.querySelectorAll('.formInput')
+    const errorMessageInputs = document.querySelectorAll('.errorMessageInput')
+
+    function setAppForm() {
+
+    }
+
+    function getAppFormValues() {
+
+        let name = nameInput.value
+
+        let valid = true
+
+        if (name == null || name == '') {
+            valid = false
+            nameErrorMessage.textContent = "This field is required."
+            nameErrorMessage.classList.remove('d-none')
+        }
+
+        let values = {
+            'valid': valid,
+            'values': {
+                'name': name,
+            }
+        }
+
+        return values
+
+    }
+
+    formInputs.forEach(function(input) {
+        input.addEventListener('input', handleInputChange);
+        input.addEventListener('change', handleInputChange);
+    });
+
+    function handleInputChange(event) {
+        var input = event.target;
+        hideErrorMessages()
+    }
+
+    function hideErrorMessages() {
+        errorMessageInputs.forEach(function(errorMessage) {
+            errorMessage.classList.add('d-none');
+            errorMessage.textContent = ''
+        });
+    }
+
+    setAppForm();
+
+</script>

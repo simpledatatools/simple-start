@@ -1,0 +1,60 @@
+{% extends "monitor/base/base.html" %}
+{% load static %}
+
+{% block header %}
+{% include 'monitor/base/header.html' %}
+{% endblock %}
+
+{% block side_menu %}
+{% include 'monitor/base/side-menu-app.html' %}
+{% endblock %}
+
+{% block content %}
+{% include 'monitor/app_users/components/form.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+    const formLoader = document.getElementById('form-loader')
+    const saveBtn = document.getElementById('save-btn');
+
+    saveBtn.addEventListener('click', () => {
+        event.preventDefault();
+        saveAppUser()
+    });
+
+    function saveAppUser() {
+
+        let data = getAppUserFormValues()
+        
+        if (data['valid']) {
+        
+            saveBtn.classList.add('d-none');
+            formLoader.classList.remove('d-none');
+
+            const url = "{% url 'ajax_add_app_user' app.app_id %}";
+            const formData = data['values'];
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": getCookie('csrftoken'),
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                
+                formLoader.classList.add('d-none');
+                window.location.assign(data['redirect'])
+            })
+            .catch(error => {
+                console.error(error);
+                formLoader.classList.add('d-none');
+            });
+        }
+    } 
+
+</script>
+{% endblock %}

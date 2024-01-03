@@ -1,0 +1,95 @@
+{% extends "monitor/base/base.html" %}
+{% load static %}
+
+{% block header %}
+{% include 'monitor/base/header.html' %}
+{% endblock %}
+
+{% block side_menu %}
+{% include 'monitor/base/side-menu.html' %}
+{% endblock %}
+
+{% block content %}
+{% include 'monitor/apps/components/form.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+    const appFormLoader = document.getElementById('app-form-loader')
+    const appFormHolder = document.getElementById('app-form-holder')
+
+    /* Initial loading */
+
+    function getAppItem() {
+        const url = "{% url 'ajax_get_app_item' %}?app_id={{app.app_id}}";
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": getCookie('csrftoken'),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+
+            nameInput.value = data['name']
+            appFormHolder.classList.remove('d-none')
+            appFormLoader.classList.add('d-none')
+
+        })
+        .catch(error => {
+            console.error(error);
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        appFormHolder.classList.add('d-none')
+        appFormLoader.classList.remove('d-none')
+        getAppItem()
+    })
+
+    const formLoader = document.getElementById('form-loader')
+    const saveBtn = document.getElementById('save-btn');
+
+    saveBtn.addEventListener('click', () => {
+        event.preventDefault();
+        updateApp()
+    });
+
+    function updateApp() {
+
+        let data = getAppFormValues()
+        
+        if (data['valid']) {
+
+            data['values']['app_id'] = '{{ app.app_id }}'
+        
+            saveBtn.classList.add('d-none');
+            formLoader.classList.remove('d-none');
+
+            const url = "{% url 'ajax_update_app' %}";
+            const formData = data['values'];
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": getCookie('csrftoken'),
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                
+                formLoader.classList.add('d-none');
+                window.location.assign(data['redirect'])
+            })
+            .catch(error => {
+                console.error(error);
+                formLoader.classList.add('d-none');
+            });
+        }
+    }
+
+</script>
+{% endblock %}

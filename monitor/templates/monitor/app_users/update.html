@@ -1,0 +1,96 @@
+{% extends "monitor/base/base.html" %}
+{% load static %}
+
+{% block header %}
+{% include 'monitor/base/header.html' %}
+{% endblock %}
+
+{% block side_menu %}
+{% include 'monitor/base/side-menu-app.html' %}
+{% endblock %}
+
+{% block content %}
+{% include 'monitor/app_users/components/form.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+    const app_userFormLoader = document.getElementById('app_user-form-loader')
+    const app_userFormHolder = document.getElementById('app_user-form-holder')
+
+    /* Initial loading */
+
+    function getAppUserItem() {
+        const url = "{% url 'ajax_get_app_user_item' app.app_id %}?app_user_id={{app_user.app_user_id}}";
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": getCookie('csrftoken'),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+
+            emailInput.value = data['email']
+            roleInput.value = data['role']
+            app_userFormHolder.classList.remove('d-none')
+            app_userFormLoader.classList.add('d-none')
+
+        })
+        .catch(error => {
+            console.error(error);
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        app_userFormHolder.classList.add('d-none')
+        app_userFormLoader.classList.remove('d-none')
+        getAppUserItem()
+    })
+
+    const formLoader = document.getElementById('form-loader')
+    const saveBtn = document.getElementById('save-btn');
+
+    saveBtn.addEventListener('click', () => {
+        event.preventDefault();
+        updateAppUser()
+    });
+
+    function updateAppUser() {
+
+        let data = getAppUserFormValues()
+        
+        if (data['valid']) {
+
+            data['values']['app_user_id'] = '{{ app_user.app_user_id }}'
+        
+            saveBtn.classList.add('d-none');
+            formLoader.classList.remove('d-none');
+
+            const url = "{% url 'ajax_update_app_user' app.app_id %}";
+            const formData = data['values'];
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": getCookie('csrftoken'),
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                
+                formLoader.classList.add('d-none');
+                window.location.assign(data['redirect'])
+            })
+            .catch(error => {
+                console.error(error);
+                formLoader.classList.add('d-none');
+            });
+        }
+    }
+
+</script>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% load static %}
+
+<div class="modal fade" id="customers-selector-modal" tabindex="-1">
+  <div class="modal-dialog modal-fullscreen">
+      <div class="modal-content" style="background-color: #f9f9fb">
+          <nav class="topnav navbar navbar-expand fixed-top navbar-light bg-white">
+              <div class="container p-1 m-0">
+                <div class="col-lg-8 mb-3 mb-lg-0">
+                  <h5 class="customers-selector-modal-title ps-3 mt-3" id="customers-selector-modal-title">{{title}}</h5>
+                </div>
+                <div class="col-lg-4 mb-3 mb-lg-0">
+                  <ul class="navbar-nav align-items-center ms-auto float-end">
+                    <li class="nav-item no-caret d-none d-sm-block me-3">
+                      <div id="add-loader" class="d-none">
+                        {% include 'monitor/base/loader-inline.html' %}
+                      </div>
+                    </li>
+                    <li class="nav-item no-caret d-none d-sm-block me-3">
+                      <button class="btn btn-link text-dark" type="button" id="customers-selector-modal-close">Close</button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+          </nav>
+          <div class="" id="customers-selector-modal-body" style="overflow-y: scroll;">
+              <div class="container-lg">
+                  <div id="customers-selector-content">
+                    {% include 'monitor/customers/components/customers-list.html' with component='customers-selector' add_enabled=False selector=True %}
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>

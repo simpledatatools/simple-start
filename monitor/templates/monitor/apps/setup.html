@@ -1,0 +1,29 @@
+{% extends "monitor/base/base.html" %}
+{% load static %}
+
+{% block header %}
+{% include 'monitor/base/header.html' %}
+{% endblock %}
+
+{% block side_menu %}
+{% include 'monitor/base/side-menu-app-setup.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="row mt-3">
+    <div class="col-12">
+        <a href="{% url 'app_home' app.app_id %}" class="float-start">Back to app</a>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-12">
+        Here will be setup
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+</script>
+{% endblock %}

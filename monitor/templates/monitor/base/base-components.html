@@ -1,0 +1,42 @@
+{% load static %}
+<div class="modal fade" id="media-viewer-modal" tabindex="-1" aria-labelledby="mediaViewerModelLabel" aria-hidden="true" style="z-index: 9999;">
+    <div class="modal-dialog modal-fullscreen" style="background-color: #000;">
+        <div class="modal-content">
+          <div class="row" style="background-color: #000;">
+            <div class="col">
+              <nav class="topnav navbar navbar-expand fixed-top" style="background-color: #000;">
+                <div class="container p-0 m-0">
+                  <div class="col-lg-8 mb-3 mb-lg-0">
+                    <h5 class="media-viewer-modal-title ps-3 mt-3" id="page-share-settings-modal-title"></h5>
+                  </div>
+                  <div class="col-lg-4 mb-3 mb-lg-0">
+                    <ul class="navbar-nav align-items-center ms-auto float-end">
+                      <li class="nav-item no-caret d-none d-sm-block me-3">
+                        <div id="add-loader" class="d-none">
+                          {% include 'monitor/base/loader-inline.html' %}
+                        </div>
+                      </li>
+                      <li class="nav-item no-caret d-none d-sm-block me-3">
+                        <button class="btn btn-link text-white" type="button" id="media-viewer-modal-close">Close</button>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </nav>
+            </div>
+          </div>
+          <div class="row flex-grow-1 mt-5" style="background-color: #000;">
+            <div class="col">
+              <div class="page-settings-modal-body" id="page-settings-modal-body" style="overflow-y: scroll; background-color: #000;">
+                <div class="d-flex justify-content-center align-items-center h-100">
+                    <img id="media-viewer-img" class="img-fluid d-none">
+                    <video controls id="media-viewer-video" class="d-none">
+                        <source id="media-viewer-video-src">
+                    </video>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>

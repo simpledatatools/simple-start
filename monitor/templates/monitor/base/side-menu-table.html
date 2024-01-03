@@ -1,0 +1,14 @@
+{% load static %}
+<div class="side-menu menu-vertical menu bg-menu-theme">
+    <ul class="menu-inner py-1 pt-4 ps">
+      <li class="menu-header small text-uppercase">
+        <span class="menu-header-text">Content</span>
+      </li>
+      <li class="menu-item {% if smh == 'table_fields' %}active{% endif %}">
+        <a href="{% url 'table_fields' app.app_id table.table_id %}" class="menu-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss menu-icon"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+          <div>Table Fields</div>
+        </a>
+      </li>
+    </ul>
+</div>

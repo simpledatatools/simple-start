@@ -1,0 +1,104 @@
+{% extends "monitor/base/base.html" %}
+{% load static %}
+
+{% block header %}
+{% include 'monitor/base/header.html' %}
+{% endblock %}
+
+{% block side_menu %}
+{% include 'monitor/base/side-menu.html' %}
+{% endblock %}
+
+{% block content %}
+{% include 'monitor/apps/components/apps-list.html' with component='apps-list' add_enabled=True %}
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+
+/* Add app */
+
+function addApp() {
+    window.location.assign("{% url 'add_app' %}")
+}
+
+/* Deleting a app */
+
+function deleteApp(app_id) {
+    const deleteIcon = document.getElementById('delete_app_icon_' + app_id)
+    const deleteButton = document.getElementById('delete_app_' + app_id)
+    const cancelButton = document.getElementById('cancel_delete_app_' + app_id)
+    deleteIcon.classList.add('d-none')
+    deleteButton.classList.remove('d-none')
+    cancelButton.classList.remove('d-none')
+}
+
+function confirmDeleteApp(app_id) {
+    
+    const deleteIcon = document.getElementById('delete_app_icon_' + app_id)
+    const deleteButton = document.getElementById('delete_app_' + app_id)
+    const cancelButton = document.getElementById('cancel_delete_app_' + app_id)
+    const appItem = document.getElementById('app_' + app_id)
+    const deleteLoader = document.getElementById('delete_app_loader_' + app_id)
+    deleteIcon.classList.add('d-none')
+    deleteButton.classList.add('d-none')
+    cancelButton.classList.add('d-none')
+    deleteLoader.classList.remove('d-none')
+
+    const url = "{% url 'ajax_remove_app' %}";
+    const formData = {
+        'app_id': app_id,
+        'redirect': false,
+    };
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": getCookie('csrftoken'),
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        appItem.remove()
+    })
+    .catch(error => {
+        console.error(error);
+        addLoader.classList.add('d-none');
+    });
+
+}
+
+function cancelDeleteApp(app_id) {
+    const deleteIcon = document.getElementById('delete_app_icon_' + app_id)
+    const deleteButton = document.getElementById('delete_app_' + app_id)
+    const cancelButton = document.getElementById('cancel_delete_app_' + app_id)
+    deleteIcon.classList.remove('d-none')
+    deleteButton.classList.add('d-none')
+    cancelButton.classList.add('d-none')
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    let appsListComponent = new ListComponent('apps-list', 'list', "{% url 'ajax_get_apps' %}");
+
+    const queryParams = new URLSearchParams(window.location.search);
+    if (queryParams.has('page')) {
+        appsListComponent.setPage(queryParams.get('page'))
+    } else {
+        appsListComponent.setPage(1)
+    }
+    if (queryParams.has('page_size')) {
+        appsListComponent.setPage(queryParams.get('page_size'))
+    } else {
+        appsListComponent.setPageSize(25)
+    }
+    
+
+    appsListComponent.initialLoad();
+
+});
+
+</script>
+{% endblock %}

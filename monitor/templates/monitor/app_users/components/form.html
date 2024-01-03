@@ -1,0 +1,112 @@
+{% load static %}
+<div id="app_user-form-loader" class="d-none">
+    {% include 'monitor/base/loader.html' %}
+</div>
+<div class="row mt-3" id="app_user-form-holder">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5>{{ form_title }}</h5>
+                    </div>
+                    <div class="col-auto">
+                        <div id="form-loader" class="d-none">
+                            {% include 'monitor/base/loader-inline.html' %}
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12" id="emailHolder">
+                        <label class="small mb-1" for="emailInput">App User Email</label>
+                        <input class="form-control formInput" id="emailInput" type="text" placeholder="Enter the user's email" {% if edit %}readonly{% endif %}>
+                        <span class="errorMessageInput text-sm text-danger d-none" id="emailErrorMessage"></span>
+                    </div>
+
+                    <div class="col-12 mt-3" id="roleHolder">
+                        <label for="roleInput">Role</label>
+                        <select class="form-control" id="roleInput">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+
+                </div>
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <a href="javascript:void(0);" class="btn btn-primary float-end" id="save-btn">Save</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    const emailHolder = document.getElementById('emailHolder')
+    const emailInput = document.getElementById('emailInput')
+    const emailErrorMessage = document.getElementById('emailErrorMessage')
+
+    const roleHolder = document.getElementById('roleHolder')
+    const roleInput = document.getElementById('roleInput')
+    const roleErrorMessage = document.getElementById('roleErrorMessage')
+
+    const formInputs = document.querySelectorAll('.formInput')
+    const errorMessageInputs = document.querySelectorAll('.errorMessageInput')
+
+    function setAppUserForm() {
+
+    }
+
+    function getAppUserFormValues() {
+
+        let email = emailInput.value
+        let role = roleInput.value
+
+        let valid = true
+
+        if (email == null || email == '') {
+            valid = false
+            emailErrorMessage.textContent = "This field is required."
+            emailErrorMessage.classList.remove('d-none')
+        }
+
+        if (role == null || role == '') {
+            valid = false
+            roleErrorMessage.textContent = "This field is required."
+            roleErrorMessage.classList.remove('d-none')
+        }
+
+        let values = {
+            'valid': valid,
+            'values': {
+                'email': email,
+                'role': role,
+            }
+        }
+
+        return values
+
+    }
+
+    formInputs.forEach(function(input) {
+        input.addEventListener('input', handleInputChange);
+        input.addEventListener('change', handleInputChange);
+    });
+
+    function handleInputChange(event) {
+        var input = event.target;
+        hideErrorMessages()
+    }
+
+    function hideErrorMessages() {
+        errorMessageInputs.forEach(function(errorMessage) {
+            errorMessage.classList.add('d-none');
+            errorMessage.textContent = ''
+        });
+    }
+
+    setAppUserForm();
+
+</script>

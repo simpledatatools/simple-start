@@ -1,0 +1,14 @@
+{% load static %}
+<div class="side-menu menu-vertical menu bg-menu-theme">
+    <ul class="menu-inner py-1 pt-4 ps">
+      <li class="menu-header small text-uppercase">
+        <span class="menu-header-text">Content</span>
+      </li>
+      <li class="menu-item {% if smh == 'apps' %}active{% endif %}">
+        <a href="{% url 'apps' %}" class="menu-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-grid menu-icon"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <div>Apps</div>
+        </a>
+      </li>
+    </ul>
+</div>

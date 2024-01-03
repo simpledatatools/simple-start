@@ -1,0 +1,75 @@
+{% load static %}
+<div class="header bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light">
+      <div class="container-fluid">
+        <a class="navbar-toggler menu-toggle" href="#" id="menuToggle">
+          <span class="navbar-toggler-icon"></span>
+        </a>
+        <a class="navbar-brand" href="{% url 'apps' %}">
+            <div class="fw-500">
+                Simple Start {% if app %} > {{app.name}}{% endif %}
+            </div>
+        </a>
+        <button class="navbar-toggler" id="mobileMenuToggle" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+          <ul class="navbar-nav align-items-center ms-auto">
+            <li class="nav-item no-caret d-md-block me-3">
+                <div id="pages-loader" class="d-none">
+                    {% include 'monitor/base/loader-inline.html' %}
+                </div>
+            </li>
+            {% if app %}
+            <li class="nav-item no-caret me-3">
+                <a class="nav-link fw-400" id="navbarDropdownDocs" href="{% url 'apps' %}">
+                    <div class="fw-500">Apps</div>
+                </a>
+            </li>
+            {% endif %}
+            {% if user.is_authenticated %}
+            <!-- User -->
+            <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle" href="javascript:void(0);" data-bs-toggle="dropdown">
+                    <img src="{% if request.user.profile_photo.micro_thumbnail %}{{ request.user.profile_photo.micro_thumbnail.url }}{% elif request.user.profile_photo.thumbnail %}{{ request.user.profile_photo.thumbnail.url }}{% elif request.user.profile_photo.file %}{{request.user.profile_photo.file.url}}{% else %}{% static 'monitor/assets/images/placeholder-profile.png' %}{% endif %}" class="rounded-circle me-2" alt="Avatar" width="30" height="30">
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <div class="d-flex">
+                                <div class="flex-grow-1">
+                                    <span class="fw-semibold d-block">{{request.user.display_name}}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'profile' %}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user me-1 mt-1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            <span class="align-middle">My Profile</span>
+                        </a>
+                    </li>
+                    <li>
+                        <div class="dropdown-divider"></div>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'logout' %}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-log-out me-1 mt-1"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                            <span class="align-middle">Log Out</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <!--/ User -->
+            {% else %} 
+            <li class="nav-item no-caret me-3">
+                <a class="nav-link fw-400" id="navbarDropdownDocs" href="{% url 'login' %}">
+                    <div class="fw-500">Login</div>
+                </a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+</div>

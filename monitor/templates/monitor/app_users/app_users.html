@@ -1,0 +1,103 @@
+{% extends "monitor/base/base.html" %}
+{% load static %}
+
+{% block header %}
+{% include 'monitor/base/header.html' %}
+{% endblock %}
+
+{% block side_menu %}
+{% include 'monitor/base/side-menu-app.html' %}
+{% endblock %}
+
+{% block content %}
+{% include 'monitor/app_users/components/app_users-list.html' with component='app_users-list' add_enabled=True %}
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+
+/* Add app_user */
+
+function addAppUser() {
+    window.location.assign("{% url 'add_app_user' app.app_id %}")
+}
+
+/* Deleting a app_user */
+
+function deleteAppUser(app_user_id) {
+    const deleteIcon = document.getElementById('delete_app_user_icon_' + app_user_id)
+    const deleteButton = document.getElementById('delete_app_user_' + app_user_id)
+    const cancelButton = document.getElementById('cancel_delete_app_user_' + app_user_id)
+    deleteIcon.classList.add('d-none')
+    deleteButton.classList.remove('d-none')
+    cancelButton.classList.remove('d-none')
+}
+
+function confirmDeleteAppUser(app_user_id) {
+    
+    const deleteIcon = document.getElementById('delete_app_user_icon_' + app_user_id)
+    const deleteButton = document.getElementById('delete_app_user_' + app_user_id)
+    const cancelButton = document.getElementById('cancel_delete_app_user_' + app_user_id)
+    const app_userItem = document.getElementById('app_user_' + app_user_id)
+    const deleteLoader = document.getElementById('delete_app_user_loader_' + app_user_id)
+    deleteIcon.classList.add('d-none')
+    deleteButton.classList.add('d-none')
+    cancelButton.classList.add('d-none')
+    deleteLoader.classList.remove('d-none')
+
+    const url = "{% url 'ajax_remove_app_user' app.app_id %}";
+    const formData = {
+        'app_user_id': app_user_id,
+        'redirect': false,
+    };
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": getCookie('csrftoken'),
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        app_userItem.remove()
+    })
+    .catch(error => {
+        console.error(error);
+        addLoader.classList.add('d-none');
+    });
+
+}
+
+function cancelDeleteAppUser(app_user_id) {
+    const deleteIcon = document.getElementById('delete_app_user_icon_' + app_user_id)
+    const deleteButton = document.getElementById('delete_app_user_' + app_user_id)
+    const cancelButton = document.getElementById('cancel_delete_app_user_' + app_user_id)
+    deleteIcon.classList.remove('d-none')
+    deleteButton.classList.add('d-none')
+    cancelButton.classList.add('d-none')
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    let app_usersListComponent = new ListComponent('app_users-list', 'list', "{% url 'ajax_get_app_users' app.app_id %}");
+
+    const queryParams = new URLSearchParams(window.location.search);
+    if (queryParams.has('page')) {
+        app_usersListComponent.setPage(queryParams.get('page'))
+    } else {
+        app_usersListComponent.setPage(1)
+    }
+    if (queryParams.has('page_size')) {
+        app_usersListComponent.setPage(queryParams.get('page_size'))
+    } else {
+        app_usersListComponent.setPageSize(25)
+    }
+
+    app_usersListComponent.initialLoad();
+
+});
+
+</script>
+{% endblock %}

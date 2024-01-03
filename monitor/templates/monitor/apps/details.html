@@ -1,0 +1,116 @@
+{% extends "monitor/base/base.html" %}
+{% load static %}
+
+{% block header %}
+{% include 'monitor/base/header.html' %}
+{% endblock %}
+
+{% block side_menu %}
+{% include 'monitor/base/side-menu-app.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="row mt-3">
+    <div class="col-12">
+        <a href="{% url 'update_app' app.app_id %}" class="float-end">Edit app</a>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5>{{ app.name }}</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <div class="text-dark pe-2" id="controls_{{app.app_id}}">
+                            <a href="javascript:void(0);" class="text-dark px-1 d-flex align-items-center justify-content-center" id="delete_app_icon_{{app.app_id}}">
+                                <svg onclick="deleteApp('{{app.app_id}}')" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                            </a>
+                            <button onclick="cancelDeleteApp('{{app.app_id}}')" class="btn btn-link text-muted d-none" id="cancel_delete_app_{{app.app_id}}">Cancel</button>
+                            <button onclick="confirmDeleteApp('{{app.app_id}}')" class="btn btn-danger btn-sm d-none" id="delete_app_{{app.app_id}}">Confirm archive</button>
+                        </div>
+                        <div id="app_delete_loader_{{app.app_id}}" class="d-none">
+                            {% include 'monitor/base/loader-inline.html' %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+    function deleteApp(app_id) {
+        const deleteIcon = document.getElementById('delete_app_icon_' + app_id)
+        const deleteButton = document.getElementById('delete_app_' + app_id)
+        const cancelButton = document.getElementById('cancel_delete_app_' + app_id)
+        deleteIcon.classList.add('d-none')
+        deleteButton.classList.remove('d-none')
+        cancelButton.classList.remove('d-none')
+    }
+
+    function confirmDeleteApp(app_id) {
+        
+        const deleteIcon = document.getElementById('delete_app_icon_' + app_id)
+        const deleteButton = document.getElementById('delete_app_' + app_id)
+        const cancelButton = document.getElementById('cancel_delete_app_' + app_id)
+        const appItem = document.getElementById('app_config_' + app_id)
+        const deleteLoader = document.getElementById('app_delete_loader_' + app_id)
+        deleteIcon.classList.add('d-none')
+        deleteButton.classList.add('d-none')
+        cancelButton.classList.add('d-none')
+        deleteLoader.classList.remove('d-none')
+
+        const url = "{% url 'ajax_remove_app' %}";
+        const formData = {
+            'app_id': app_id,
+        };
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": getCookie('csrftoken'),
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data['redirect']) {
+                window.location.assign(data['redirect'])
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            deleteIcon.classList.remove('d-none')
+            deleteButton.classList.remove('d-none')
+            deleteLoader.classList.add('d-none');
+        });
+
+    }
+
+    function cancelDeleteApp(app_id) {
+        const deleteIcon = document.getElementById('delete_app_icon_' + app_id)
+        const deleteButton = document.getElementById('delete_app_' + app_id)
+        const cancelButton = document.getElementById('cancel_delete_app_' + app_id)
+        deleteIcon.classList.remove('d-none')
+        deleteButton.classList.add('d-none')
+        cancelButton.classList.add('d-none')
+    }
+
+</script>
+{% endblock %}

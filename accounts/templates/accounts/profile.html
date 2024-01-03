@@ -1,0 +1,444 @@
+{% extends "monitor/base/full-screen-base.html" %}
+{% load static %}
+
+{% block header %}
+{% include 'monitor/base/header.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="container-xl px-4 mt-4">
+    <div class="row mt-3">
+        <div class="col-lg-4">
+            <!-- Profile picture card-->
+            <div class="card mb-4 mb-xl-0 text-center">
+                <div class="card-header p-0">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-header m-0 pb-3">Profile Photo</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body text-center mt-3">
+                    <div class="d-flex justify-content-center square-img-container {% if not request.user.profile_photo %}d-none{% endif %}" id="profile-photo-holder" >
+                        <img id="profile-photo" {% if request.user.profile_photo.file %}onload="loadImage('profile-photo', '{{ request.user.profile_photo.file.url }}')"{% endif%} data-onload-complete="false" onclick="openMediaViewer('image', '{{request.user.profile_photo.file.url}}')" src="{% if request.user.profile_photo.micro_thumbnail %}{{ request.user.profile_photo.micro_thumbnail.url }}{% elif request.user.profile_photo.thumbnail %}{{ request.user.profile_photo.thumbnail.url }}{% else %}{{request.user.profile_photo.file.url}}{% endif %}" class="img-fluid rounded square-img" width="250" height="250">
+                    </div>
+                    <!-- Profile picture upload button-->
+                    <div id="profile-upload-button-holder">
+                        <button class="btn btn-primary btn-sm mt-3" type="button" id="profile-upload-button">Upload new image</button>
+                    </div>
+                    <div id="remove-profile-upload-button-holder">
+                        <button onclick="removeProfilePhoto()" class="btn btn-link btn-sm text-muted" type="button" id="remove-profile-upload-button">Remove profile photo</button>
+                    </div>
+                    <div id="profile-photo-loader" class="mt-3 d-none">
+                        {% include 'monitor/base/loader-inline.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="row">
+                <div class="col-12">
+                    <!-- Account details card-->
+                    <div class="card mb-4">
+                        <div class="card-header p-0">
+                            <div class="row">
+                                <div class="col">
+                                    <h5 class="card-header m-0 pt-3 pb-3">Account Details</h5>
+                                </div>
+                                <div class="col-auto">
+                                    <div id="save-loader" class="d-none">
+                                        {% include 'monitor/base/loader-inline.html' %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body mt-3">
+                            <form>
+                                <!-- Form Row -->
+                                <div class="row gx-3 mb-3">
+                                    <!-- Form Group (first name)-->
+                                    <div class="col-md-12">
+                                        <label class="small mb-1" for="inputDisplayName">Display Name</label>
+                                        <input class="form-control" id="inputDisplayName" type="text" placeholder="Enter you name as you want it displayed" value="{% if request.user.display_name %}{{request.user.display_name}}{% endif %}">
+                                    </div>
+                                </div>
+                                <!-- Form Group (email address)-->
+                                <div class="mb-3">
+                                    <label class="small mb-1" for="inputEmailAddress">Email address</label>
+                                    <input class="form-control form-control-solid" id="inputEmailAddress" type="email" value="{{request.user.email}}" readonly>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input class="d-none" type="file" id="profile-photo-input">
+<!-- Remove Profile Photo Modal -->
+<div class="modal fade" id="removeProfilePhotoModal" tabindex="-1" aria-labelledby="removeProfilePhotoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="removeBlockModalLabel">Please confirm you want to remove your profile photo.</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline-link" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger btn-sm" id="confirmRemoveProfilePhotoButton" onclick="confirmRemoveProfilePhoto()">Remove</button>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+
+    const saveLoader = document.querySelector('#save-loader');
+    const displayName = document.getElementById('inputDisplayName');
+    let pendingSaveNameRequest = false
+    let typingTimeout;
+
+    displayName.addEventListener('blur', function(event) {
+        // Trim the text
+        var content = displayName.value.trim()
+        // Check if empty
+        if (content == "") {
+            saveDisplayName()
+        }
+    });
+    
+    /* Name Input */
+    displayName.addEventListener('input', function() {
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(function() {
+            if (!pendingSaveNameRequest) {
+                saveDisplayName()
+            }
+        }, 500);
+    });
+
+    displayName.addEventListener("keydown", function (event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            if (!pendingSaveNameRequest) {
+                saveDisplayName()
+            }
+        }
+    });
+
+    function saveDisplayName() {
+
+        pendingSaveNameRequest = true
+
+        const name = displayName.value;
+        
+        saveLoader.classList.remove('d-none');
+
+        const url = "{% url 'ajax_update_profile' %}";
+        const formData = {
+            'name': name,
+        };
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": getCookie('csrftoken'),
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            saveLoader.classList.add('d-none');
+            pendingSaveNameRequest = false
+        })
+        .catch(error => {
+            console.error(error);
+            saveLoader.classList.add('d-none');
+            pendingSaveNameRequest = false
+        });
+    };
+
+    /* Profile photo stuff */
+
+    const profilePhoto = document.getElementById('profile-photo');
+    const profilePhotoHolder = document.getElementById('profile-photo-holder');
+    const profileInput = document.getElementById('profile-photo-input');
+    const profileUploadButton = document.getElementById('profile-upload-button');
+    const profileUploadButtonHolder = document.getElementById('profile-upload-button-holder');
+    const profilePhotoLoader = document.getElementById('profile-photo-loader')
+    let uploadedProfileFiles = [];
+
+    profileUploadButton.addEventListener("click", () => {
+        var event = new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: true
+        });
+        profileInput.dispatchEvent(event);
+    })
+
+    profilePhoto.addEventListener("click", () => {
+        var event = new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: true
+        });
+        profileInput.dispatchEvent(event);
+    })
+
+    let validFileTypes;
+    function isValidFileType(fileType) {
+        validFileTypes = [
+            'image/png',
+            'image/jpeg',
+        ];
+        return validFileTypes.includes(fileType);
+    }
+
+    profileInput.addEventListener('change', () => {
+
+        let filesToSign = [];
+        const uploadedFile = profileInput.files[0];
+        const uploadedFileType = uploadedFile.type;
+        const uploadedFileName = uploadedFile.name;
+        const uploadedFileSize = uploadedFile.size;
+        const uploadedFileSizeMb = (uploadedFileSize / (1024 ** 2)).toFixed(1)
+        const uploadedFileExtension = uploadedFileName.split('.').pop();
+        const uploadedFileId = makeId(10)
+        uploadedFile['id'] = uploadedFileId
+        uploadedProfileFiles.push(uploadedFile)
+
+        let fileToSign;
+        // Check if file type is valid
+        if (!isValidFileType(uploadedFileType)) {
+            fileToSign = {
+                'id': uploadedFileId,
+                'file_name': uploadedFileName,
+                'file_type': uploadedFileType,
+                'file_extension': uploadedFileExtension,
+                'file_size': uploadedFileSize,
+                'file_size_mb': uploadedFileSizeMb,
+                'valid': false, 
+            }
+        } else {
+            fileToSign = {
+                'id': uploadedFileId,
+                'file_name': uploadedFileName,
+                'file_type': uploadedFileType,
+                'file_extension': uploadedFileExtension,
+                'file_size': uploadedFileSize,
+                'file_size_mb': uploadedFileSizeMb,
+                'valid': true 
+            }
+        }
+        filesToSign.push(fileToSign)
+
+        profileInput.value = ""
+        profileUploadButtonHolder.classList.add('d-none')
+        removeProfilePhotoButtonHolder.classList.add('d-none')
+        profilePhotoLoader.classList.remove('d-none')
+
+        const url = "{%  url 'ajax_file_sign' %}";
+        formData = {
+            'filesToSign': filesToSign
+        }
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": getCookie('csrftoken'),
+            },
+            body: JSON.stringify(formData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            let filesToSave = data['files']
+            for (let i = 0; i < filesToSave.length; i++) {
+                let fileToSave = filesToSave[i]
+                for (let j = 0; j < uploadedProfileFiles.length; j++) {
+                    let uploadedFile = uploadedProfileFiles[j]
+                    if (fileToSave['id'] == uploadedFile['id']) {
+                        fileToSave['file'] = uploadedFile
+                    }
+                }
+            }
+            
+            uploadFiles(filesToSave)
+
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+            profileUploadButtonHolder.classList.remove('d-none')
+            removeProfilePhotoButtonHolder.classList.remove('d-none')
+            profilePhotoLoader.classList.add('d-none')
+        });
+
+    });
+
+    function uploadFiles(filesToSave) {
+
+        for (let i = 0; i < filesToSave.length; i++) {
+            let fileToSave = filesToSave[i]
+            if (fileToSave['valid']) {
+                const uploadedFileId = fileToSave['id']
+                const uploadedFile = fileToSave['file']
+                const uploadedFileType = fileToSave['file_type']
+                const uploadedFileName = fileToSave['file_name']
+                const uploadedFileOriginalName = fileToSave['file_original_name']
+                const uploadedFileSize = fileToSave['file_size']
+                const uploadedFileSizeMb = fileToSave['file_size_mb']
+                const uploadedFileExtension = fileToSave['file_extension']
+                const url = fileToSave['url']
+                const file = fileToSave['file']
+
+                let xhr = new XMLHttpRequest();
+                xhr.open("POST", fileToSave['presigned'].url);
+
+                let postData = new FormData();
+                for (key in fileToSave['presigned'].fields) {
+                    postData.append(key, fileToSave['presigned'].fields[key]);
+                }
+                postData.append('file', file);
+
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200 || xhr.status === 204) {
+                            
+                            const url = "{% url 'ajax_update_profile_photo' %}";
+                            delete fileToSave.file // Remove the file before sending in
+
+                            formData = {
+                                'file_to_save': fileToSave,
+                            }
+                            fetch(url, {
+                                method: "POST",
+                                headers: {
+                                    "X-Requested-With": "XMLHttpRequest",
+                                    "X-CSRFToken": getCookie('csrftoken'),
+                                },
+                                body: JSON.stringify(formData),
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                profilePhoto.setAttribute("src", data['url']);
+                                profilePhotoHolder.classList.remove('d-none')
+                            })
+                            .catch(error => {
+                                console.error('There was a problem with the fetch operation:', error);
+                            });
+
+                        } else {
+                            alert("Could not upload file.");
+                        }
+                    }
+                };
+
+                xhr.upload.onprogress = function(e) {
+                    if (e.lengthComputable) {
+                        let percentComplete = ((e.loaded / fileToSave.file_size) * 100).toFixed(2);
+                        if (percentComplete >= 100) {
+                            // progressDisplay.classList.add('d-none')
+                            // successDisplay.classList.remove('d-none')
+                        }
+                    }
+                };
+
+                xhr.send(postData);
+
+            } else {
+                profileUploadButtonHolder.classList.remove('d-none')
+                removeProfilePhotoButtonHolder.classList.remove('d-none')
+                profilePhotoLoader.classList.add('d-none')
+                // Indicate here that the file is not valid
+                // const newDiv = document.createElement('div');
+                // newDiv.innerHTML = fileToSave['placeholder'];
+                // uploadingFileHolder.appendChild(newDiv)
+            }
+            
+        }
+
+    }
+
+    profilePhoto.addEventListener('load', () => {
+        profileUploadButtonHolder.classList.remove('d-none')
+        removeProfilePhotoButtonHolder.classList.remove('d-none')
+        profilePhotoLoader.classList.add('d-none')
+        profilePhoto.classList.remove('d-none')
+    });
+
+    const removeProfilePhotoModal = new bootstrap.Modal(document.getElementById('removeProfilePhotoModal'));
+    const removeProfilePhotoButton = document.getElementById('remove-profile-upload-button');
+    const removeProfilePhotoButtonHolder = document.getElementById('remove-profile-upload-button-holder');
+    const confirmRemoveButton = document.getElementById('confirmRemoveProfilePhotoButton');
+
+    function removeProfilePhoto() {
+        removeProfilePhotoModal.show();
+    }
+
+    // Add event listener for when confirm delete button is clicked
+    function confirmRemoveProfilePhoto() {
+
+        removeProfilePhotoModal.hide()
+
+        profileUploadButtonHolder.classList.add('d-none')
+        removeProfilePhotoButtonHolder.classList.add('d-none')
+        profilePhotoLoader.classList.remove('d-none')
+
+        const url = "{% url 'ajax_remove_profile_photo' %}";
+        const formData = {
+        };
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": getCookie('csrftoken'),
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            profilePhoto.setAttribute("src", '');
+            profilePhotoHolder.classList.add('d-none')
+            profileUploadButtonHolder.classList.remove('d-none')
+            removeProfilePhotoButtonHolder.classList.remove('d-none')
+            profilePhotoLoader.classList.add('d-none')
+        })
+        .catch(error => {
+            console.error(error);
+            profileUploadButtonHolder.classList.remove('d-none')
+            removeProfilePhotoButtonHolder.classList.remove('d-none')
+            profilePhotoLoader.classList.add('d-none')
+        });
+
+    };
+
+    function makeId(length) {
+        let result = '';
+        let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let charactersLength = characters.length;
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() *
+                charactersLength));
+        }
+        return result;
+    }
+
+
+</script>
+
+{% endblock %}
