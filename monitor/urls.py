@@ -2,7 +2,7 @@ from django.urls import path
 from monitor.views import home as home
 from monitor.views import apps as apps
 from monitor.views import app_users as app_users
-from monitor.views import profiles as profiles
+from monitor.views import datasets as datasets
 
 urlpatterns = [
 
@@ -37,16 +37,16 @@ urlpatterns = [
     path('ajax/apps/<app_id>/users/remove/', app_users.ajax_remove_app_user, name='ajax_remove_app_user'),
     path('apps/<app_id>/users/<app_user_id>/details/', app_users.app_user_details, name='app_user_details'),
 
-    # Profiles
-    path('apps/<app_id>/profiles/', profiles.profiles, name='profiles'),
-    path('ajax/apps/<app_id>/profiles/list/', profiles.ajax_get_profiles, name='ajax_get_profiles'),
-    path('ajax/apps/<app_id>/profiles/item/', profiles.ajax_get_profile_item, name='ajax_get_profile_item'),
-    path('apps/<app_id>/profiles/add/', profiles.add_profile, name='add_profile'),
-    path('ajax/apps/<app_id>/profiles/add/', profiles.ajax_add_profile, name='ajax_add_profile'),
-    path('apps/<app_id>/profiles/<profile_id>/update/', profiles.update_profile, name='update_profile'),
-    path('ajax/apps/<app_id>/profiles/update/', profiles.ajax_update_profile, name='ajax_update_profile'),
-    path('apps/<app_id>/profiles/<profile_id>/remove/', profiles.remove_profile, name='remove_profile'),
-    path('ajax/apps/<app_id>/profiles/remove/', profiles.ajax_remove_profile, name='ajax_remove_profile'),
-    path('apps/<app_id>/profiles/<profile_id>/details/', profiles.profile_details, name='profile_details'),
+    # Datasets
+    path('apps/<app_id>/datasets/', datasets.datasets, name='datasets'),
+    path('ajax/apps/<app_id>/datasets/list/', datasets.ajax_get_datasets, name='ajax_get_datasets'),
+    path('ajax/apps/<app_id>/datasets/item/', datasets.ajax_get_dataset_item, name='ajax_get_dataset_item'),
+    path('apps/<app_id>/datasets/add/', datasets.add_dataset, name='add_dataset'),
+    path('ajax/apps/<app_id>/datasets/add/', datasets.ajax_add_dataset, name='ajax_add_dataset'),
+    path('apps/<app_id>/datasets/<dataset_id>/update/', datasets.update_dataset, name='update_dataset'),
+    path('ajax/apps/<app_id>/datasets/update/', datasets.ajax_update_dataset, name='ajax_update_dataset'),
+    path('apps/<app_id>/datasets/<dataset_id>/remove/', datasets.remove_dataset, name='remove_dataset'),
+    path('ajax/apps/<app_id>/datasets/remove/', datasets.ajax_remove_dataset, name='ajax_remove_dataset'),
+    path('apps/<app_id>/datasets/<dataset_id>/details/', datasets.dataset_details, name='dataset_details'),
 
 ]

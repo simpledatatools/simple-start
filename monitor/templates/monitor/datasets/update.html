@@ -10,19 +10,19 @@
 {% endblock %}
 
 {% block content %}
-{% include 'monitor/profiles/components/form.html' %}
+{% include 'monitor/datasets/components/form.html' %}
 {% endblock %}
 
 {% block extra_js %}
 <script>
 
-    const profileFormLoader = document.getElementById('profile-form-loader')
-    const profileFormHolder = document.getElementById('profile-form-holder')
+    const datasetFormLoader = document.getElementById('dataset-form-loader')
+    const datasetFormHolder = document.getElementById('dataset-form-holder')
     
     /* Initial loading */
 
-    function getProfileItem() {
-        const url = "{% url 'ajax_get_profile_item' app.app_id %}?profile_id={{profile.profile_id}}";
+    function getDatasetItem() {
+        const url = "{% url 'ajax_get_dataset_item' app.app_id %}?dataset_id={{dataset.dataset_id}}";
         fetch(url, {
             method: 'GET',
             headers: {
@@ -34,8 +34,8 @@
         .then(data => {
 
             nameInput.value = data['name']
-            profileFormHolder.classList.remove('d-none')
-            profileFormLoader.classList.add('d-none')
+            datasetFormHolder.classList.remove('d-none')
+            datasetFormLoader.classList.add('d-none')
 
         })
         .catch(error => {
@@ -44,9 +44,9 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        profileFormHolder.classList.add('d-none')
-        profileFormLoader.classList.remove('d-none')
-        getProfileItem()
+        datasetFormHolder.classList.add('d-none')
+        datasetFormLoader.classList.remove('d-none')
+        getDatasetItem()
     })
 
     const formLoader = document.getElementById('form-loader')
@@ -54,21 +54,21 @@
 
     saveBtn.addEventListener('click', () => {
         event.preventDefault();
-        updateProfile()
+        updateDataset()
     });
 
-    function updateProfile() {
+    function updateDataset() {
 
-        let data = getProfileFormValues()
+        let data = getDatasetFormValues()
         
         if (data['valid']) {
 
-            data['values']['profile_id'] = '{{ profile.profile_id }}'
+            data['values']['dataset_id'] = '{{ dataset.dataset_id }}'
         
             saveBtn.classList.add('d-none');
             formLoader.classList.remove('d-none');
 
-            const url = "{% url 'ajax_update_profile' app.app_id %}";
+            const url = "{% url 'ajax_update_dataset' app.app_id %}";
             const formData = data['values'];
             fetch(url, {
                 method: 'POST',

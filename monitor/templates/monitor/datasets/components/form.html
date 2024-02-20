@@ -1,8 +1,8 @@
 {% load static %}
-<div id="profile-form-loader" class="d-none">
+<div id="dataset-form-loader" class="d-none">
     {% include 'monitor/base/loader.html' %}
 </div>
-<div class="row mt-3" id="profile-form-holder">
+<div class="row mt-3" id="dataset-form-holder">
     <div class="col-12">
         <div class="card">
             <div class="card-body">
@@ -19,8 +19,8 @@
                 
                 <div class="row mt-3" id="nameHolder">
                     <div class="col-12">
-                        <label class="small mb-1" for="nameInput">Profile name</label>
-                        <input class="form-control formInput" id="nameInput" type="text" placeholder="Enter a short name for this profile">
+                        <label class="small mb-1" for="nameInput">Dataset name</label>
+                        <input class="form-control formInput" id="nameInput" type="text" placeholder="Enter a short name for this dataset">
                         <span class="errorMessageInput text-sm text-danger d-none" id="nameErrorMessage"></span>
                     </div>
                 </div>
@@ -44,11 +44,11 @@
     const formInputs = document.querySelectorAll('.formInput')
     const errorMessageInputs = document.querySelectorAll('.errorMessageInput')
 
-    function setProfileForm() {
+    function setDatasetForm() {
 
     }
 
-    function getProfileFormValues() {
+    function getDatasetFormValues() {
 
         let name = nameInput.value
 
@@ -88,6 +88,6 @@
         });
     }
 
-    setProfileForm();
+    setDatasetForm();
 
 </script>

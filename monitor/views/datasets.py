@@ -48,7 +48,7 @@ from django.apps import apps
 
 
 @login_required(login_url='login')
-def profiles(request, app_id):
+def datasets(request, app_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -79,16 +79,16 @@ def profiles(request, app_id):
     
     context = {
         'app': app,
-        'smh': 'profiles',
+        'smh': 'datasets',
         'admin': admin,
         'role': role,
     }
     
-    return render(request, 'monitor/profiles/profiles.html', context)
+    return render(request, 'monitor/datasets/datasets.html', context)
 
 
 @login_required(login_url='login')
-def add_profile(request, app_id):
+def add_dataset(request, app_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -116,17 +116,17 @@ def add_profile(request, app_id):
 
     context = {
         'app': app,
-        'smh': 'profiles',
-        'form_title': 'Add profile',
+        'smh': 'datasets',
+        'form_title': 'Add dataset',
         'admin': admin,
         'role': role,
     }
     
-    return render(request, 'monitor/profiles/add.html', context)
+    return render(request, 'monitor/datasets/add.html', context)
 
 
 @login_required(login_url='login')
-def profile_details(request, app_id, profile_id):
+def dataset_details(request, app_id, dataset_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -148,8 +148,8 @@ def profile_details(request, app_id, profile_id):
         raise Http404()
     admin = is_admin(app_user)
     role = app_user.role
-    profile = Profile.objects.filter(profile_id=profile_id, app=app, status='active').first()
-    if not profile:
+    dataset = Dataset.objects.filter(dataset_id=dataset_id, app=app, status='active').first()
+    if not dataset:
         error = 'Invalid request'
         create_user_log(request, valid=False, error=error)
         raise Http404()
@@ -159,17 +159,17 @@ def profile_details(request, app_id, profile_id):
 
     context = {
         'app': app,
-        'profile': profile,
-        'smh': 'profiles',
+        'dataset': dataset,
+        'smh': 'datasets',
         'admin': admin,
         'role': role,
     }
     
-    return render(request, 'monitor/profiles/details.html', context)
+    return render(request, 'monitor/datasets/details.html', context)
 
 
 @login_required(login_url='login')
-def update_profile(request, app_id, profile_id):
+def update_dataset(request, app_id, dataset_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -191,8 +191,8 @@ def update_profile(request, app_id, profile_id):
         raise Http404()
     admin = is_admin(app_user)
     role = app_user.role
-    profile = Profile.objects.filter(profile_id=profile_id, app=app, status='active').first()
-    if not profile:
+    dataset = Dataset.objects.filter(dataset_id=dataset_id, app=app, status='active').first()
+    if not dataset:
         error = 'Invalid request'
         create_user_log(request, valid=False, error=error)
         raise Http404()
@@ -202,18 +202,18 @@ def update_profile(request, app_id, profile_id):
 
     context = {
         'app': app,
-        'profile': profile,
-        'smh': 'profiles',
-        'form_title': 'Update profile',
+        'dataset': dataset,
+        'smh': 'datasets',
+        'form_title': 'Update dataset',
         'admin': admin,
         'role': role,
     }
     
-    return render(request, 'monitor/profiles/update.html', context)
+    return render(request, 'monitor/datasets/update.html', context)
 
 
 @login_required(login_url='login')
-def remove_profile(request, app_id, profile_id):
+def remove_dataset(request, app_id, dataset_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -235,8 +235,8 @@ def remove_profile(request, app_id, profile_id):
         raise Http404()
     admin = is_admin(app_user)
     role = app_user.role
-    profile = Profile.objects.filter(profile_id=profile_id, app=app, status='active').first()
-    if not profile:
+    dataset = Dataset.objects.filter(dataset_id=dataset_id, app=app, status='active').first()
+    if not dataset:
         error = 'Invalid request'
         create_user_log(request, valid=False, error=error)
         raise Http404()
@@ -246,19 +246,19 @@ def remove_profile(request, app_id, profile_id):
 
     context = {
         'app': app,
-        'profile': profile,
-        'smh': 'profiles',
+        'dataset': dataset,
+        'smh': 'datasets',
         'admin': admin,
         'role': role,
     }
     
-    return render(request, 'monitor/profiles/remove.html', context)
+    return render(request, 'monitor/datasets/remove.html', context)
 
 
 
 @require_http_methods(['GET'])
 @login_required(login_url='login')
-def ajax_get_profiles(request, app_id):
+def ajax_get_datasets(request, app_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -293,7 +293,7 @@ def ajax_get_profiles(request, app_id):
     create_user_log(request)  
     # ----------------------------------------------------------------------------------------
 
-    response_object = get_profiles_list(request, app)
+    response_object = get_datasets_list(request, app)
 
     return JsonResponse(response_object, status=200)
 
@@ -301,7 +301,7 @@ def ajax_get_profiles(request, app_id):
 
 @require_http_methods(['GET'])
 @login_required(login_url='login')
-def ajax_get_profile_item(request, app_id):
+def ajax_get_dataset_item(request, app_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -327,13 +327,13 @@ def ajax_get_profile_item(request, app_id):
         error = 'Invalid request'
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
-    profile_id = request.GET.get('profile_id', None)
-    if profile_id == None:
-        error = "Missing the 'profile_id' parameter"
+    dataset_id = request.GET.get('dataset_id', None)
+    if dataset_id == None:
+        error = "Missing the 'dataset_id' parameter"
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
-    profile = Profile.objects.filter(profile_id=profile_id, app=app, status='active').first()
-    if not profile:
+    dataset = Dataset.objects.filter(dataset_id=dataset_id, app=app, status='active').first()
+    if not dataset:
         error = 'Invalid request'
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
@@ -342,10 +342,10 @@ def ajax_get_profile_item(request, app_id):
     # ----------------------------------------------------------------------------------------
 
     html = render_to_string(
-        template_name="monitor/profiles/components/profile-item.html",
+        template_name="monitor/datasets/components/dataset-item.html",
         context={
             'app': app,
-            'profile': profile,
+            'dataset': dataset,
             'render_type': 'display',
             'admin': admin,
         'role': role,
@@ -354,7 +354,7 @@ def ajax_get_profile_item(request, app_id):
 
     response_object = {
         'html': html,
-        'name': profile.name,
+        'name': dataset.name,
     }
 
     return JsonResponse(response_object, status=200)
@@ -363,7 +363,7 @@ def ajax_get_profile_item(request, app_id):
 
 @require_http_methods(['POST'])
 @login_required(login_url='login')
-def ajax_add_profile(request, app_id):
+def ajax_add_dataset(request, app_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -400,27 +400,27 @@ def ajax_add_profile(request, app_id):
     # ----------------------------------------------------------------------------------------
 
     # Create the collection
-    profile = create_profile(request, app, name)
+    dataset = create_dataset(request, app, name)
 
     # ----------------------------------------------------------------------------------------
     create_user_log(request, data=data)  
     # ----------------------------------------------------------------------------------------
 
     html = render_to_string(
-        template_name="monitor/profiles/components/profile-item.html",
+        template_name="monitor/datasets/components/dataset-item.html",
         context={
             'app': app,
-            'profile': profile,
+            'dataset': dataset,
             'render_type': 'list',
             'admin': admin,
         'role': role,
         }
     )
 
-    redirect = request.build_absolute_uri(reverse('profiles', args=(app.app_id, )))
+    redirect = request.build_absolute_uri(reverse('datasets', args=(app.app_id, )))
     response_object = {
         'app_id': app.app_id,
-        'profile_id': profile.profile_id,
+        'dataset_id': dataset.dataset_id,
         'redirect': redirect,
         'html': html,
     }
@@ -431,7 +431,7 @@ def ajax_add_profile(request, app_id):
 
 @require_http_methods(['POST'])
 @login_required(login_url='login')
-def ajax_update_profile(request, app_id):
+def ajax_update_dataset(request, app_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -458,15 +458,15 @@ def ajax_update_profile(request, app_id):
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
     data = json.loads(request.body)
-    profile_id = None
-    if 'profile_id' in data:
-        profile_id = data['profile_id']
-    if profile_id == None:
-        error = "Missing the 'profile_id' parameter"
+    dataset_id = None
+    if 'dataset_id' in data:
+        dataset_id = data['dataset_id']
+    if dataset_id == None:
+        error = "Missing the 'dataset_id' parameter"
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
-    profile = Profile.objects.filter(profile_id=profile_id, app=app, status='active').first()
-    if not profile:
+    dataset = Dataset.objects.filter(dataset_id=dataset_id, app=app, status='active').first()
+    if not dataset:
         error = 'Invalid request'
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
@@ -481,24 +481,24 @@ def ajax_update_profile(request, app_id):
     create_user_log(request, data=data)  
     # ----------------------------------------------------------------------------------------
 
-    profile.name = name
-    profile.save()
+    dataset.name = name
+    dataset.save()
 
     html = render_to_string(
-        template_name="monitor/profiles/components/profile-item.html",
+        template_name="monitor/datasets/components/dataset-item.html",
         context={
             'app': app,
-            'profile': profile,
+            'dataset': dataset,
             'render_type': 'list',
             'admin': admin,
         'role': role,
         }
     )
 
-    redirect = request.build_absolute_uri(reverse('profile_details', args=(app.app_id, profile.profile_id, )))
+    redirect = request.build_absolute_uri(reverse('dataset_details', args=(app.app_id, dataset.dataset_id, )))
 
     response_object = {
-        'message': 'Profile updated successfully',
+        'message': 'Dataset updated successfully',
         'redirect': redirect,
         'html': html,
     }
@@ -509,7 +509,7 @@ def ajax_update_profile(request, app_id):
 
 @require_http_methods(['POST'])
 @login_required(login_url='login')
-def ajax_remove_profile(request, app_id):
+def ajax_remove_dataset(request, app_id):
 
     # ----------------------------------------------------------------------------------------
     # Users, Permissions, and Params
@@ -536,15 +536,15 @@ def ajax_remove_profile(request, app_id):
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
     data = json.loads(request.body)
-    profile_id = None
-    if 'profile_id' in data:
-        profile_id = data['profile_id']
-    if profile_id == None:
-        error = "Missing the 'profile_id' parameter"
+    dataset_id = None
+    if 'dataset_id' in data:
+        dataset_id = data['dataset_id']
+    if dataset_id == None:
+        error = "Missing the 'dataset_id' parameter"
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
-    profile = Profile.objects.filter(profile_id=profile_id, app=app, status='active').first()
-    if not profile:
+    dataset = Dataset.objects.filter(dataset_id=dataset_id, app=app, status='active').first()
+    if not dataset:
         error = 'Invalid request'
         create_user_log(request, valid=False, error=error)
         return JsonResponse({'error': error}, status=400)
@@ -552,13 +552,13 @@ def ajax_remove_profile(request, app_id):
     create_user_log(request, data=data)  
     # ----------------------------------------------------------------------------------------
 
-    profile.status = 'archived'
-    profile.save()
+    dataset.status = 'archived'
+    dataset.save()
 
-    redirect = request.build_absolute_uri(reverse('profiles', args=(app.app_id, )))
+    redirect = request.build_absolute_uri(reverse('datasets', args=(app.app_id, )))
 
     response_object = {
-        'message': 'Profile archived successfully',
+        'message': 'Dataset archived successfully',
         'redirect': redirect,
     }
 
@@ -566,7 +566,7 @@ def ajax_remove_profile(request, app_id):
 
 
 
-def get_profiles_list(request, app):
+def get_datasets_list(request, app):
 
     user = request.user
 
@@ -596,56 +596,56 @@ def get_profiles_list(request, app):
         page_size = 25
     
     # Query from app regions that the user a part of
-    profile_items = Profile.objects.filter(app=app, status="active").order_by('name')
+    dataset_items = Dataset.objects.filter(app=app, status="active").order_by('name')
 
     # Search Term
     if search_term:
-        profile_items = profile_items.filter(
-            Q(profile_id__icontains=search_term) | 
+        dataset_items = dataset_items.filter(
+            Q(dataset_id__icontains=search_term) | 
             Q(name__icontains=search_term)
         )
 
     # Filters
     if order:
         if order == 'created_at_desc':
-            profile_items = profile_items.order_by('-created_at')
+            dataset_items = dataset_items.order_by('-created_at')
         if order == 'created_at_asc':
-            profile_items = profile_items.order_by('created_at')
+            dataset_items = dataset_items.order_by('created_at')
 
     # Pagination
     total_pages = None
     load_more = False
     total_count = 0
-    if profile_items:
-        total_count = len(profile_items)
-        paginator = Paginator(profile_items, per_page=page_size)
+    if dataset_items:
+        total_count = len(dataset_items)
+        paginator = Paginator(dataset_items, per_page=page_size)
         total_pages = paginator.num_pages # Number of total pages
-        profile_items = paginator.get_page(page) # Filters current queryset
+        dataset_items = paginator.get_page(page) # Filters current queryset
         if page < total_pages:
             load_more = True
 
     # Generate the Response Object
-    profile_list_html = []
-    for profile_object in profile_items:
+    dataset_list_html = []
+    for dataset_object in dataset_items:
         html = render_to_string(
-            template_name="monitor/profiles/components/profile-item.html",
+            template_name="monitor/datasets/components/dataset-item.html",
             context={
                 'app': app,
-                'profile': profile_object,
+                'dataset': dataset_object,
                 'render_type': render_type,
             }
         )
-        profile_list_html.append(html)
+        dataset_list_html.append(html)
 
     results = True
-    if len(profile_items) == 0:
+    if len(dataset_items) == 0:
         results = False
 
     # Response
     response_object = {
         'success': True,
         'results': results,
-        'items': profile_list_html,
+        'items': dataset_list_html,
         'page': page,
         'total_pages': total_pages,
         'load_more': load_more,
@@ -655,16 +655,16 @@ def get_profiles_list(request, app):
     return response_object
 
 
-def create_profile(request, app, name):
+def create_dataset(request, app, name):
     
     user = request.user
     ip_address = get_ip_address(request)
 
-    profile = Profile()
-    profile.profile_id = randomstr()
-    profile.name = name
-    profile.app = app
-    profile.created_user = user
-    profile.save()
+    dataset = Dataset()
+    dataset.dataset_id = randomstr()
+    dataset.name = name
+    dataset.app = app
+    dataset.created_user = user
+    dataset.save()
 
-    return profile
+    return dataset

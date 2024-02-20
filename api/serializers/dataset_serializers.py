@@ -8,16 +8,16 @@ from accounts.models import *
 from backend.models import *
 
 
-class ProfileSerializer(serializers.ModelSerializer):
+class DatasetSerializer(serializers.ModelSerializer):
 
     created_at = serializers.SerializerMethodField()
     last_updated = serializers.SerializerMethodField()
     created_user = serializers.SerializerMethodField()
     
     class Meta:
-        model = Profile
+        model = Dataset
         fields = [
-            'profile_id',
+            'dataset_id',
             'name',
             'created_user',
             'created_at',

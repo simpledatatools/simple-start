@@ -30,22 +30,22 @@ def validate_app_user(func):
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# Profiles
+# Datasets
 #-----------------------------------------------------------------------------------------------------------------------------
 
-def validate_profile(func):
+def validate_dataset(func):
     @wraps(func)
     def decorator(request, *args, **kwargs):
         app_id = kwargs.get('app_id')
-        profile_id = kwargs.get('profile_id')
+        dataset_id = kwargs.get('dataset_id')
         user = request.user
 
-        profile = Profile.objects.filter(profile_id=profile_id, app__app_id=app_id, status="active", app__status="active").first()
-        if not profile:
-            return Response({'errors': ['Profile does not exist']}, status=status.HTTP_400_BAD_REQUEST)
+        dataset = Dataset.objects.filter(dataset_id=dataset_id, app__app_id=app_id, status="active", app__status="active").first()
+        if not dataset:
+            return Response({'errors': ['Dataset does not exist']}, status=status.HTTP_400_BAD_REQUEST)
 
         # Add app and app_user to request for later use
-        request.profile = profile
+        request.dataset = dataset
 
         return func(request, *args, **kwargs)
     return decorator

@@ -130,7 +130,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'simple-start',
+        'NAME': 'kulinda-sna',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         'HOST': 'localhost',

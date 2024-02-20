@@ -29,26 +29,26 @@ logger = logging.getLogger('SimpleAg')
 from backend.decorators import *
 
 # Serializers
-from api.serializers.profile_serializers import *
+from api.serializers.dataset_serializers import *
 
 # API documentation
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from api.documentation.profile_documentation import *
+from api.documentation.dataset_documentation import *
 from api.documentation.common_elements import error_response, success_response
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# Getting profiles
+# Getting datasets
 #-----------------------------------------------------------------------------------------------------------------------------
 
 @swagger_auto_schema(
     method='get',
-    tags=['Profiles'],
-    operation_id="Get Profile List",
-    operation_description="Retrieve a list of profiles",
+    tags=['Datasets'],
+    operation_id="Get Dataset List",
+    operation_description="Retrieve a list of datasets",
     responses={
-        200: profile_list_response_schema,
+        200: dataset_list_response_schema,
         400: error_response,
         403: error_response
     },
@@ -62,13 +62,13 @@ from api.documentation.common_elements import error_response, success_response
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-def get_profiles(request, app_id):
+def get_datasets(request, app_id):
     
     user = request.user
     app = request.app
 
-    # Filter profiles based on app and status, using select_related for optimization
-    query = Profile.objects.select_related('app', 'created_user').filter(app=app, status='active')
+    # Filter datasets based on app and status, using select_related for optimization
+    query = Dataset.objects.select_related('app', 'created_user').filter(app=app, status='active')
 
     # Apply search filtering if applicable
     search_query = request.query_params.get('search', '').strip()
@@ -99,16 +99,16 @@ def get_profiles(request, app_id):
     paginator = Paginator(query, page_size)
 
     try:
-        profiles = paginator.page(page_number)
+        datasets = paginator.page(page_number)
     except PageNotAnInteger:
-        profiles = paginator.page(1)
+        datasets = paginator.page(1)
     except EmptyPage:
-        profiles = paginator.page(paginator.num_pages)
+        datasets = paginator.page(paginator.num_pages)
 
-    serializer = ProfileSerializer(profiles, many=True)
+    serializer = DatasetSerializer(datasets, many=True)
     response_data = {
-        'profiles': serializer.data,
-        'page': profiles.number,
+        'datasets': serializer.data,
+        'page': datasets.number,
         'pages': paginator.num_pages,
         'records_count': paginator.count
     }
@@ -118,11 +118,11 @@ def get_profiles(request, app_id):
 
 @swagger_auto_schema(
     method='get',
-    tags=['Profiles'],
-    operation_id="Get Profile",
-    operation_description="Retrieve a profile",
+    tags=['Datasets'],
+    operation_id="Get Dataset",
+    operation_description="Retrieve a dataset",
     responses={
-        200: profile_response_schema,
+        200: dataset_response_schema,
         400: error_response,
         403: error_response
     },
@@ -131,30 +131,30 @@ def get_profiles(request, app_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-@validate_profile
-def get_profile(request, app_id, profile_id):
+@validate_dataset
+def get_dataset(request, app_id, dataset_id):
 
     user = request.user
     app = request.app
-    profile = request.profile
+    dataset = request.dataset
 
-    serializer = ProfileSerializer(profile, many=False)
-    return Response({'profile': serializer.data})
+    serializer = DatasetSerializer(dataset, many=False)
+    return Response({'dataset': serializer.data})
 
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# Adding profiles
+# Adding datasets
 #-----------------------------------------------------------------------------------------------------------------------------
 
 @swagger_auto_schema(
     method='post',
-    tags=['Profiles'],
-    operation_id="Add Profile",
-    operation_description="Add a profile",
-    request_body=profile_add_schema,
+    tags=['Datasets'],
+    operation_id="Add Dataset",
+    operation_description="Add a dataset",
+    request_body=dataset_add_schema,
     responses={
-        201: profile_response_schema,
+        201: dataset_response_schema,
         400: error_response,
         403: error_response,
         500: error_response
@@ -163,13 +163,13 @@ def get_profile(request, app_id, profile_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-def add_profile(request, app_id):
-    profile_object = request.data
+def add_dataset(request, app_id):
+    dataset_object = request.data
     user = request.user
     app = request.app
     
-    valid_params = check_params(profile_object, [
-        {'param': 'profile_id', 'type': 'string', 'required': False, 'length': 32},
+    valid_params = check_params(dataset_object, [
+        {'param': 'dataset_id', 'type': 'string', 'required': False, 'length': 32},
         {'param': 'name', 'type': 'string', 'required': True, 'length': 250},
         {'param': 'data', 'type': 'object', 'required': False},
         {'param': 'config', 'type': 'object', 'required': False},
@@ -178,24 +178,24 @@ def add_profile(request, app_id):
     if valid_params['valid']:
         try:
             with transaction.atomic():
-                result = create_profile_record(profile_object, app, request.user)
-            serializer = ProfileSerializer(result['profile'])
-            return Response({'profile': serializer.data}, status=status.HTTP_201_CREATED)
+                result = create_dataset_record(dataset_object, app, request.user)
+            serializer = DatasetSerializer(result['dataset'])
+            return Response({'dataset': serializer.data}, status=status.HTTP_201_CREATED)
         except Exception as e:
-            logger.error(f'Error creating profile: {e}')
-            return Response({'errors': ['Failed to create profile.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(f'Error creating dataset: {e}')
+            return Response({'errors': ['Failed to create dataset.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         return Response({'errors': valid_params['errors']}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(
     method='post',
-    tags=['Profiles'],
-    operation_id="Add Profiles",
-    operation_description="Add a list of profiles",
-    request_body=profile_add_request_body,
+    tags=['Datasets'],
+    operation_id="Add Datasets",
+    operation_description="Add a list of datasets",
+    request_body=dataset_add_request_body,
     responses={
-        200: add_profiles_response_schema,
+        200: add_datasets_response_schema,
         400: error_response,
         403: error_response,
         500: error_response
@@ -204,56 +204,56 @@ def add_profile(request, app_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-def add_profiles(request, app_id):
+def add_datasets(request, app_id):
     data = request.data
     app = request.app
 
-    profiles_data = data.get('profiles')
-    if not isinstance(profiles_data, list) or not profiles_data:
-        return Response({'errors': ['Profiles list is required and should not be empty.']}, status=status.HTTP_400_BAD_REQUEST)
-    if len(profiles_data) > 100: # Check if there are more than 100 objects
+    datasets_data = data.get('datasets')
+    if not isinstance(datasets_data, list) or not datasets_data:
+        return Response({'errors': ['Datasets list is required and should not be empty.']}, status=status.HTTP_400_BAD_REQUEST)
+    if len(datasets_data) > 100: # Check if there are more than 100 objects
         return Response({'errors': ['Cannot perform bulk operations on more than 100 objects.']}, status=status.HTTP_400_BAD_REQUEST)
     
-    response_data = {'profiles_added': [], 'profiles_not_added': []}
+    response_data = {'datasets_added': [], 'datasets_not_added': []}
 
     try:
         with transaction.atomic():
-            for index, profile_object in enumerate(profiles_data):
-                valid_params = check_params(profile_object, [
-                    {'param': 'profile_id', 'type': 'string', 'required': False, 'length': 32},
+            for index, dataset_object in enumerate(datasets_data):
+                valid_params = check_params(dataset_object, [
+                    {'param': 'dataset_id', 'type': 'string', 'required': False, 'length': 32},
                     {'param': 'name', 'type': 'string', 'required': True, 'length': 250},
                     {'param': 'data', 'type': 'object', 'required': False},
                     {'param': 'config', 'type': 'object', 'required': False},
                 ])
 
                 if valid_params['valid']:
-                    result = create_profile_record(profile_object, app, request.user)
-                    serializer = ProfileSerializer(result['profile'])
-                    response_data['profiles_added'].append(serializer.data)
+                    result = create_dataset_record(dataset_object, app, request.user)
+                    serializer = DatasetSerializer(result['dataset'])
+                    response_data['datasets_added'].append(serializer.data)
                 else:
-                    response_data['profiles_not_added'].append({
+                    response_data['datasets_not_added'].append({
                         'index': index,
-                        'submitted_object': profile_object,
+                        'submitted_object': dataset_object,
                         'errors': valid_params['errors']
                     })
         return Response(response_data, status=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f'Error adding profiles: {e}')
-        return Response({'errors': ['Failed to add profiles.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f'Error adding datasets: {e}')
+        return Response({'errors': ['Failed to add datasets.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# Updating profiles
+# Updating datasets
 #-----------------------------------------------------------------------------------------------------------------------------
 
 @swagger_auto_schema(
     method='put',
-    tags=['Profiles'],
-    operation_id="Update Profile",
-    operation_description="Update a profile",
-    request_body=profile_update_schema,
+    tags=['Datasets'],
+    operation_id="Update Dataset",
+    operation_description="Update a dataset",
+    request_body=dataset_update_schema,
     responses={
-        201: profile_response_schema,
+        201: dataset_response_schema,
         400: error_response,
         403: error_response,
         500: error_response
@@ -262,15 +262,15 @@ def add_profiles(request, app_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-@validate_profile
-def update_profile(request, app_id, profile_id):
-    profile_object = request.data
+@validate_dataset
+def update_dataset(request, app_id, dataset_id):
+    dataset_object = request.data
     user = request.user
     app = request.app
-    profile = request.profile
+    dataset = request.dataset
     
-    valid_params = check_params(profile_object, [
-        {'param': 'profile_id', 'type': 'string', 'required': False, 'length': 32},
+    valid_params = check_params(dataset_object, [
+        {'param': 'dataset_id', 'type': 'string', 'required': False, 'length': 32},
         {'param': 'name', 'type': 'string', 'required': False, 'length': 250},
         {'param': 'data', 'type': 'object', 'required': False},
         {'param': 'config', 'type': 'object', 'required': False},
@@ -279,24 +279,24 @@ def update_profile(request, app_id, profile_id):
     if valid_params['valid']:
         try:
             with transaction.atomic():
-                result = update_profile_record(app, profile, profile_object)
-            serializer = ProfileSerializer(result['profile'])
-            return Response({'profile': serializer.data}, status=status.HTTP_200_OK)
+                result = update_dataset_record(app, dataset, dataset_object)
+            serializer = DatasetSerializer(result['dataset'])
+            return Response({'dataset': serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f'Error updating profile: {e}')
-            return Response({'errors': ['Failed to update profile.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(f'Error updating dataset: {e}')
+            return Response({'errors': ['Failed to update dataset.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         return Response({'errors': valid_params['errors']}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(
     method='put',
-    tags=['Profiles'],
-    operation_id="Update Profiles",
-    operation_description="Update a list of profiles",
-    request_body=profile_update_request_body,
+    tags=['Datasets'],
+    operation_id="Update Datasets",
+    operation_description="Update a list of datasets",
+    request_body=dataset_update_request_body,
     responses={
-        200: update_profiles_response_schema,
+        200: update_datasets_response_schema,
         400: error_response,
         403: error_response,
         500: error_response
@@ -305,66 +305,66 @@ def update_profile(request, app_id, profile_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-def update_profiles(request, app_id):
+def update_datasets(request, app_id):
     data = request.data
     app = request.app
 
-    profiles_data = data.get('profiles')
-    if not isinstance(profiles_data, list) or not profiles_data:
-        return Response({'errors': ['Profiles list is required and should not be empty.']}, status=status.HTTP_400_BAD_REQUEST)
-    if len(profiles_data) > 100: # Check if there are more than 100 objects
+    datasets_data = data.get('datasets')
+    if not isinstance(datasets_data, list) or not datasets_data:
+        return Response({'errors': ['Datasets list is required and should not be empty.']}, status=status.HTTP_400_BAD_REQUEST)
+    if len(datasets_data) > 100: # Check if there are more than 100 objects
         return Response({'errors': ['Cannot perform bulk operations on more than 100 objects.']}, status=status.HTTP_400_BAD_REQUEST)
     
-    response_data = {'profiles_updated': [], 'profiles_not_updated': []}
+    response_data = {'datasets_updated': [], 'datasets_not_updated': []}
 
     try:
         with transaction.atomic():
-            for index, profile_object in enumerate(profiles_data):
-                valid_params = check_params(profile_object, [
-                    {'param': 'profile_id', 'type': 'string', 'required': True, 'length': 32},
+            for index, dataset_object in enumerate(datasets_data):
+                valid_params = check_params(dataset_object, [
+                    {'param': 'dataset_id', 'type': 'string', 'required': True, 'length': 32},
                     {'param': 'name', 'type': 'string', 'required': False, 'length': 250},
                     {'param': 'data', 'type': 'object', 'required': False},
                     {'param': 'config', 'type': 'object', 'required': False},
                 ])
 
                 if valid_params['valid']:
-                    profile_id = profile_object['profile_id']
+                    dataset_id = dataset_object['dataset_id']
                     try:
-                        profile = Profile.objects.get(profile_id=profile_id, app=app, status="active")
-                        result = update_profile_record(app, profile, profile_object)
-                        serializer = ProfileSerializer(result['profile'])
-                        response_data['profiles_updated'].append(serializer.data)
-                    except Profile.DoesNotExist:
-                        response_data['profiles_not_updated'].append({
+                        dataset = Dataset.objects.get(dataset_id=dataset_id, app=app, status="active")
+                        result = update_dataset_record(app, dataset, dataset_object)
+                        serializer = DatasetSerializer(result['dataset'])
+                        response_data['datasets_updated'].append(serializer.data)
+                    except Dataset.DoesNotExist:
+                        response_data['datasets_not_updated'].append({
                             'index': index,
-                            'submitted_object': profile_object,
-                            'errors': ['Profile not found']
+                            'submitted_object': dataset_object,
+                            'errors': ['Dataset not found']
                         })
                 else:
-                    response_data['profiles_not_updated'].append({
+                    response_data['datasets_not_updated'].append({
                         'index': index,
-                        'submitted_object': profile_object,
+                        'submitted_object': dataset_object,
                         'errors': valid_params['errors']
                     })
 
         return Response(response_data, status=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f'Error updating profiles: {e}')
-        return Response({'errors': ['Failed to update profiles.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f'Error updating datasets: {e}')
+        return Response({'errors': ['Failed to update datasets.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# Archiving profiles
+# Archiving datasets
 #-----------------------------------------------------------------------------------------------------------------------------
 
 @swagger_auto_schema(
     method='put',
-    tags=['Profiles'],
-    operation_id="Archive Profile",
-    operation_description="Archive a profile",
+    tags=['Datasets'],
+    operation_id="Archive Dataset",
+    operation_description="Archive a dataset",
     responses={
-        201: profile_response_schema,
+        201: dataset_response_schema,
         400: error_response,
         403: error_response,
         500: error_response
@@ -373,30 +373,30 @@ def update_profiles(request, app_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-@validate_profile
-def archive_profile(request, app_id, profile_id):
+@validate_dataset
+def archive_dataset(request, app_id, dataset_id):
     app = request.app
-    profile = request.profile
+    dataset = request.dataset
 
     try:
         with transaction.atomic():
-            profile.status = "archived"
-            profile.save()
-        serializer = ProfileSerializer(profile)
-        return Response({'profile': serializer.data}, status=status.HTTP_200_OK)
+            dataset.status = "archived"
+            dataset.save()
+        serializer = DatasetSerializer(dataset)
+        return Response({'dataset': serializer.data}, status=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f'Error archiving profile: {e}')
-        return Response({'errors': ['Failed to archive profile.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f'Error archiving dataset: {e}')
+        return Response({'errors': ['Failed to archive dataset.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @swagger_auto_schema(
     method='put',
-    tags=['Profiles'],
-    operation_id="Archive Profiles",
-    operation_description="Archive a list of profiles",
-    request_body=profile_archive_request_body,
+    tags=['Datasets'],
+    operation_id="Archive Datasets",
+    operation_description="Archive a list of datasets",
+    request_body=dataset_archive_request_body,
     responses={
-        200: archive_profiles_response_schema,
+        200: archive_datasets_response_schema,
         400: error_response,
         403: error_response,
         500: error_response
@@ -405,60 +405,60 @@ def archive_profile(request, app_id, profile_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-def archive_profiles(request, app_id):
+def archive_datasets(request, app_id):
     data = request.data
     app = request.app
 
-    profiles_data = data.get('profiles')
-    if not isinstance(profiles_data, list) or not profiles_data:
-        return Response({'errors': ['Profiles list is required and should not be empty.']}, status=status.HTTP_400_BAD_REQUEST)
-    if len(profiles_data) > 100: # Check if there are more than 100 objects
+    datasets_data = data.get('datasets')
+    if not isinstance(datasets_data, list) or not datasets_data:
+        return Response({'errors': ['Datasets list is required and should not be empty.']}, status=status.HTTP_400_BAD_REQUEST)
+    if len(datasets_data) > 100: # Check if there are more than 100 objects
         return Response({'errors': ['Cannot perform bulk operations on more than 100 objects.']}, status=status.HTTP_400_BAD_REQUEST)
     
-    response_data = {'profiles_archived': [], 'profiles_not_archived': []}
+    response_data = {'datasets_archived': [], 'datasets_not_archived': []}
 
     try:
         with transaction.atomic():
-            for index, profile_object in enumerate(profiles_data):
-                valid_params = check_params(profile_object, [
-                    {'param': 'profile_id', 'type': 'string', 'required': True, 'length': 32},
+            for index, dataset_object in enumerate(datasets_data):
+                valid_params = check_params(dataset_object, [
+                    {'param': 'dataset_id', 'type': 'string', 'required': True, 'length': 32},
                 ])
 
                 if valid_params['valid']:
-                    profile_id = profile_object['profile_id']
+                    dataset_id = dataset_object['dataset_id']
                     try:
-                        profile = Profile.objects.get(profile_id=profile_id, app=app, status="active")
-                        profile.status = "archived"
-                        profile.save()
-                        serializer = ProfileSerializer(profile)
-                        response_data['profiles_archived'].append(serializer.data)
-                    except Profile.DoesNotExist:
-                        response_data['profiles_not_archived'].append({
+                        dataset = Dataset.objects.get(dataset_id=dataset_id, app=app, status="active")
+                        dataset.status = "archived"
+                        dataset.save()
+                        serializer = DatasetSerializer(dataset)
+                        response_data['datasets_archived'].append(serializer.data)
+                    except Dataset.DoesNotExist:
+                        response_data['datasets_not_archived'].append({
                             'index': index,
-                            'submitted_object': profile_object,
-                            'errors': ['Profile not found']
+                            'submitted_object': dataset_object,
+                            'errors': ['Dataset not found']
                         })
                 else:
-                    response_data['profiles_not_archived'].append({
+                    response_data['datasets_not_archived'].append({
                         'index': index,
-                        'submitted_object': profile_object,
+                        'submitted_object': dataset_object,
                         'errors': valid_params['errors']
                     })
 
         return Response(response_data, status=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f'Error archiving profiles: {e}')
-        return Response({'errors': ['Failed to archive profiles.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f'Error archiving datasets: {e}')
+        return Response({'errors': ['Failed to archive datasets.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @swagger_auto_schema(
     method='put',
-    tags=['Profiles'],
-    operation_id="Destroy Profiles",
-    operation_description="Destroy and archive all profiles",
+    tags=['Datasets'],
+    operation_id="Destroy Datasets",
+    operation_description="Destroy and archive all datasets",
     request_body=None,
     responses={
-        200: destroy_profiles_response_schema,
+        200: destroy_datasets_response_schema,
         400: error_response,
         403: error_response,
         500: error_response
@@ -467,39 +467,39 @@ def archive_profiles(request, app_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-def destroy_profiles(request, app_id):
+def destroy_datasets(request, app_id):
     user = request.user 
     app = request.app
     
     # Fetching apps that the user has access to and are active
-    profiles = Profile.objects.filter(app=app, status='active')
+    datasets = Dataset.objects.filter(app=app, status='active')
 
-    if not profiles:
-        return Response({'errors': ['No active profiles.']}, status=status.HTTP_400_BAD_REQUEST)
+    if not datasets:
+        return Response({'errors': ['No active datasets.']}, status=status.HTTP_400_BAD_REQUEST)
 
     # Update the status of each app to 'archived'
-    for profile in profiles:
-        profile.status = 'archived'
+    for dataset in datasets:
+        dataset.status = 'archived'
 
     try:
         with transaction.atomic():
-            Profile.objects.bulk_update(profiles, ['status'])
-        serializer = ProfileSerializer(profiles, many=True)
-        return Response({'profiles_archived': serializer.data}, status=status.HTTP_200_OK)
+            Dataset.objects.bulk_update(datasets, ['status'])
+        serializer = DatasetSerializer(datasets, many=True)
+        return Response({'datasets_archived': serializer.data}, status=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f'Error destroying profiles: {e}')
-        return Response({'errors': ['Failed to destroy profiles.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f'Error destroying datasets: {e}')
+        return Response({'errors': ['Failed to destroy datasets.']}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# Export profiles
+# Export datasets
 #-----------------------------------------------------------------------------------------------------------------------------
 
 @swagger_auto_schema(
     method='post',
-    tags=['Profiles'],
-    operation_id="Export Profiles",
-    operation_description="Export profile data to a flat file",
+    tags=['Datasets'],
+    operation_id="Export Datasets",
+    operation_description="Export dataset data to a flat file",
     request_body=None,
     responses={
         202: success_response,
@@ -511,7 +511,7 @@ def destroy_profiles(request, app_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedOrHasAPIKey])
 @validate_app_user
-def export_profiles(request, app_id):
+def export_datasets(request, app_id):
     user = request.user
     app = request.app
 
@@ -525,15 +525,15 @@ def export_profiles(request, app_id):
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-# Utils profiles
+# Utils datasets
 #-----------------------------------------------------------------------------------------------------------------------------
 
-def create_profile_record(data,  app, user):
+def create_dataset_record(data,  app, user):
     try:
-        profile_id = data.get('profile_id', randomstr())
+        dataset_id = data.get('dataset_id', randomstr())
 
-        profile_data = {
-            'profile_id': profile_id,
+        dataset_data = {
+            'dataset_id': dataset_id,
             'name': data['name'],
             'app': app,
             'created_user': user,
@@ -542,41 +542,41 @@ def create_profile_record(data,  app, user):
         }
 
         # Remove None values from dictionary
-        profile_data = {k: v for k, v in profile_data.items() if v is not None}
+        dataset_data = {k: v for k, v in dataset_data.items() if v is not None}
 
-        profile = Profile.objects.create(**profile_data)
+        dataset = Dataset.objects.create(**dataset_data)
 
         return {
             'success': True,
-            'profile': profile,
+            'dataset': dataset,
         }
 
     except Exception as e:
         return {
             'success': False,
-            'errors': ['Error creating the profile record'],
+            'errors': ['Error creating the dataset record'],
         }
 
 
-def update_profile_record(app, profile, data):
+def update_dataset_record(app, dataset, data):
     try:
         updated_fields = []
 
         for field in ['name', 'data', 'config']:
             if field in data:
-                setattr(profile, field, data[field])
+                setattr(dataset, field, data[field])
                 updated_fields.append(field)
 
         if updated_fields:
-            profile.save(update_fields=updated_fields)
+            dataset.save(update_fields=updated_fields)
 
         return {
             'success': True,
-            'profile': profile,
+            'dataset': dataset,
         }
 
     except Exception as e:
         return {
             'success': False,
-            'errors': ['Error updating the profile record'],
+            'errors': ['Error updating the dataset record'],
         }

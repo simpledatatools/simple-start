@@ -40,8 +40,8 @@ urlpatterns = [
     # API: Apps
     path('api/apps/', include('api.urls.app_urls')),
 
-    # API: Customers
-    path('api/apps/<str:app_id>/profiles/', include('api.urls.profile_urls')),
+    # API: Datasets
+    path('api/apps/<str:app_id>/datasets/', include('api.urls.dataset_urls')),
     
     # Web App
     path('internal/', admin.site.urls), # Standard django admin app

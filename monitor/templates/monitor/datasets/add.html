@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-{% include 'monitor/profiles/components/form.html' %}
+{% include 'monitor/datasets/components/form.html' %}
 {% endblock %}
 
 {% block extra_js %}
@@ -21,19 +21,19 @@
 
     saveBtn.addEventListener('click', () => {
         event.preventDefault();
-        saveProfile()
+        saveDataset()
     });
 
-    function saveProfile() {
+    function saveDataset() {
 
-        let data = getProfileFormValues()
+        let data = getDatasetFormValues()
         
         if (data['valid']) {
         
             saveBtn.classList.add('d-none');
             formLoader.classList.remove('d-none');
 
-            const url = "{% url 'ajax_add_profile' app.app_id %}";
+            const url = "{% url 'ajax_add_dataset' app.app_id %}";
             const formData = data['values'];
             fetch(url, {
                 method: 'POST',
